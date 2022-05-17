@@ -1,0 +1,6 @@
+.DS_Store
+.idea
+pgweb
+bin
+tmp/
+cover.out
