@@ -13,11 +13,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"github.com/sosedoff/pgweb/pkg/command"
-	"github.com/sosedoff/pgweb/pkg/connection"
-	"github.com/sosedoff/pgweb/pkg/history"
-	"github.com/sosedoff/pgweb/pkg/shared"
-	"github.com/sosedoff/pgweb/pkg/statements"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/connection"
+	"gitee.com/openGauss/openGauss-webclient/pkg/history"
+	"gitee.com/openGauss/openGauss-webclient/pkg/shared"
+	"gitee.com/openGauss/openGauss-webclient/pkg/statements"
 )
 
 var (

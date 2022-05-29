@@ -11,13 +11,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jessevdk/go-flags"
 
-	"github.com/sosedoff/pgweb/pkg/api"
-	"github.com/sosedoff/pgweb/pkg/bookmarks"
-	"github.com/sosedoff/pgweb/pkg/client"
-	"github.com/sosedoff/pgweb/pkg/command"
-	"github.com/sosedoff/pgweb/pkg/connection"
-	"github.com/sosedoff/pgweb/pkg/shared"
-	"github.com/sosedoff/pgweb/pkg/util"
+	"gitee.com/openGauss/openGauss-webclient/pkg/api"
+	"gitee.com/openGauss/openGauss-webclient/pkg/bookmarks"
+	"gitee.com/openGauss/openGauss-webclient/pkg/client"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/connection"
+	"gitee.com/openGauss/openGauss-webclient/pkg/shared"
+	"gitee.com/openGauss/openGauss-webclient/pkg/util"
 )
 
 var (

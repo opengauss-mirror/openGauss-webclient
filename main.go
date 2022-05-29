@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/sosedoff/pgweb/pkg/cli"
+	"gitee.com/openGauss/openGauss-webclient/pkg/cli"
 )
 
 func main() {

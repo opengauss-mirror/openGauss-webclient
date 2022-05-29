@@ -16,8 +16,8 @@ import (
 	"github.com/ScaleFT/sshkeys"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/sosedoff/pgweb/pkg/connection"
-	"github.com/sosedoff/pgweb/pkg/shared"
+	"gitee.com/openGauss/openGauss-webclient/pkg/connection"
+	"gitee.com/openGauss/openGauss-webclient/pkg/shared"
 )
 
 const (

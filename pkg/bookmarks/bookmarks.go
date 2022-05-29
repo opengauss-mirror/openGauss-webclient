@@ -9,8 +9,8 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/mitchellh/go-homedir"
 
-	"github.com/sosedoff/pgweb/pkg/command"
-	"github.com/sosedoff/pgweb/pkg/shared"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/shared"
 )
 
 // Bookmark contains information about bookmarked database connection

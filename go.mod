@@ -1,4 +1,4 @@
-module github.com/sosedoff/pgweb
+module gitee.com/openGauss/openGauss-webclient
 
 go 1.17
 

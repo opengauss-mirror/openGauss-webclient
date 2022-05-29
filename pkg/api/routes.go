@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/sosedoff/pgweb/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
 )
 
 func SetupMiddlewares(group *gin.RouterGroup) {

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sosedoff/pgweb/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
 
 	"github.com/stretchr/testify/assert"
 )

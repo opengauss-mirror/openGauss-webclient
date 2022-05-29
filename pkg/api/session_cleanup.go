@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/sosedoff/pgweb/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
 )
 
 // StartSessionCleanup starts a goroutine to cleanup idle database sessions

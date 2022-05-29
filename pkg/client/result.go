@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/sosedoff/pgweb/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
 )
 
 type Row []interface{}

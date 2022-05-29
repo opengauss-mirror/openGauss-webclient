@@ -8,7 +8,7 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/sosedoff/pgweb/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
 )
 
 // Common errors
