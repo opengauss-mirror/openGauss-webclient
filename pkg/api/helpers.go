@@ -10,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/sosedoff/pgweb/pkg/shared"
+	"gitee.com/openGauss/openGauss-webclient/pkg/shared"
 )
 
 var (

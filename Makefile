@@ -2,10 +2,10 @@ TARGETS = darwin/amd64 darwin/arm64 linux/amd64 linux/386 windows/amd64 windows/
 GIT_COMMIT = $(shell git rev-parse HEAD)
 BUILD_TIME = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ" | tr -d '\n')
 GO_VERSION = $(shell go version | awk {'print $$3'})
-DOCKER_RELEASE_TAG = "sosedoff/pgweb:$(shell git describe --abbrev=0 --tags | sed 's/v//')"
-DOCKER_LATEST_TAG = "sosedoff/pgweb:latest"
+DOCKER_RELEASE_TAG = "openGauss/openGauss-webclient:$(shell git describe --abbrev=0 --tags | sed 's/v//')"
+DOCKER_LATEST_TAG = "openGauss/openGauss-webclient:latest"
 LDFLAGS = -s -w
-PKG = github.com/sosedoff/pgweb
+PKG = gitee.com/openGauss/openGauss-webclient
 
 usage:
 	@echo ""
@@ -33,11 +33,11 @@ test-all:
 
 dev:
 	go build
-	@echo "You can now execute ./pgweb"
+	@echo "You can now execute ./openGauss-webclient"
 
 build:
 	go build
-	@echo "You can now execute ./pgweb"
+	@echo "You can now execute ./openGauss-webclient"
 
 release: LDFLAGS += -X $(PKG)/pkg/command.GitCommit=$(GIT_COMMIT)
 release: LDFLAGS += -X $(PKG)/pkg/command.BuildTime=$(BUILD_TIME)
@@ -47,13 +47,13 @@ release:
 	@gox \
 		-osarch "$(TARGETS)" \
 		-ldflags "$(LDFLAGS)" \
-		-output "./bin/pgweb_{{.OS}}_{{.Arch}}"
+		-output "./bin/openGauss-webclient_{{.OS}}_{{.Arch}}"
 
 	@echo "Building ARM binaries..."
-	GOOS=linux GOARCH=arm GOARM=5 go build -ldflags "$(LDFLAGS)" -o "./bin/pgweb_linux_arm_v5"
+	GOOS=linux GOARCH=arm GOARM=5 go build -ldflags "$(LDFLAGS)" -o "./bin/openGauss-webclient_linux_arm_v5"
 
 	@echo "Building ARM64 binaries..."
-	GOOS=linux GOARCH=arm64 GOARM=7 go build -ldflags "$(LDFLAGS)" -o "./bin/pgweb_linux_arm64_v7"
+	GOOS=linux GOARCH=arm64 GOARM=7 go build -ldflags "$(LDFLAGS)" -o "./bin/openGauss-webclient_linux_arm64_v7"
 
 	@echo "\nPackaging binaries...\n"
 	@./script/package.sh
@@ -65,11 +65,11 @@ setup:
 	go install github.com/mitchellh/gox@v1.0.1
 
 clean:
-	@rm -f ./pgweb
+	@rm -f ./openGauss-webclient*
 	@rm -rf ./bin/*
 
 docker:
-	docker build --no-cache -t pgweb .
+	docker build --no-cache -t openGauss-webclient .
 
 docker-release:
 	docker build --no-cache -t $(DOCKER_RELEASE_TAG) .

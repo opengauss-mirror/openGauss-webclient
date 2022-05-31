@@ -6,11 +6,11 @@ Web-based openGauss database browser written in Go.
 
 ## Overview
 
-Pgweb is a web-based database browser for PostgreSQL, written in Go and works
+openGauss-webclient is a web-based database browser for openGauss, written in Go and works
 on OSX, Linux and Windows machines. Main idea behind using Go for backend development
 is to utilize ability of the compiler to produce zero-dependency binaries for 
-multiple platforms. Pgweb was created as an attempt to build very simple and portable
-application to work with local or remote PostgreSQL databases.
+multiple platforms. openGauss-webclient was created as an attempt to build very simple and portable
+application to work with local or remote openGauss databases.
 
 
 ## Features
@@ -62,11 +62,35 @@ SESSIONS=1 openGauss-webclient
 ```
 
 
+## Build from source
+
+Go 1.7 is required. You can install Go with honebrew:
+
+```
+brew install go
+```
+
+To compile source code run the following command:
+```
+make setup
+make dev
+```
+
+This will produce openGauss-webclient binary in the current directory.
+
+There's also a task to compile banaries for other operating system:
+```
+make release
+```
+
+Under the hood it uses gox. Compiled binaries will be stored into ./bin directory.
+
+
 ## Testing
 
-Before running tests, make sure you have PostgreSQL server running on `localhost:5432`
+Before running tests, make sure you have openGauss server running on `localhost:5432`
 interface. Also, you must have `postgres` user that could create new databases
-in your local environment. Pgweb server should not be running at the same time.
+in your local environment. openGauss-webclient server should not be running at the same time.
 
 Execute test suite:
 
@@ -75,7 +99,7 @@ make test
 ```
 
 If you're using Docker locally, you might also run pgweb test suite against
-all supported PostgreSQL version with a single command:
+all supported openGauss version with a single command:
 
 ```
 make test-all

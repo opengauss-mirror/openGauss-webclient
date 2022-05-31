@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/sosedoff/pgweb/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
 )
 
 // Middleware to check database connection status before running queries
