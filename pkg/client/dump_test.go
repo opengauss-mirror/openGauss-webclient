@@ -9,7 +9,7 @@ import (
 )
 
 func testDumpExport(t *testing.T) {
-	url := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable", serverUser, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 
 	savePath := "/tmp/dump.sql.gz"
 	os.Remove(savePath)
@@ -34,7 +34,7 @@ func testDumpExport(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test nonexistent database
-	invalidURL := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable", serverUser, serverHost, serverPort, "foobar")
+	invalidURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, "foobar")
 	err = dump.Export(invalidURL, saveFile)
 	assert.Contains(t, err.Error(), `database "foobar" does not exist`)
 
@@ -46,7 +46,7 @@ func testDumpExport(t *testing.T) {
 
 	// Should drop "search_path" param from URI
 	dump = Dump{}
-	searchPathURL := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable&search_path=private", serverUser, serverHost, serverPort, serverDatabase)
+	searchPathURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=private", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	err = dump.Export(searchPathURL, saveFile)
 	assert.NoError(t, err)
 }

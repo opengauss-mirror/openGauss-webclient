@@ -22,7 +22,7 @@ type Dump struct {
 
 // CanExport returns true if database dump tool could be used without an error
 func (d *Dump) CanExport() bool {
-	return exec.Command("pg_dump", "--version").Run() == nil
+	return exec.Command("gs_dump", "--version").Run() == nil
 }
 
 // Export streams the database dump to the specified writer
@@ -47,7 +47,7 @@ func (d *Dump) Export(connstr string, writer io.Writer) error {
 
 	opts = append(opts, connstr)
 
-	cmd := exec.Command("pg_dump", opts...)
+	cmd := exec.Command("gs_dump", opts...)
 	cmd.Stdout = writer
 	cmd.Stderr = errOutput
 
