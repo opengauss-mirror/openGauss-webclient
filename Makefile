@@ -14,7 +14,6 @@ usage:
 	@echo "make setup           : Install all necessary dependencies"
 	@echo "make dev             : Generate development build"
 	@echo "make build           : Generate production build for current OS"
-	@echo "make bootstrap       : Install cross-compilation toolchain"
 	@echo "make release         : Generate binaries for all supported OSes"
 	@echo "make test            : Execute test suite"
 	@echo "make test-all        : Execute test suite on multiple PG versions"
@@ -43,23 +42,11 @@ release: LDFLAGS += -X $(PKG)/pkg/command.GitCommit=$(GIT_COMMIT)
 release: LDFLAGS += -X $(PKG)/pkg/command.BuildTime=$(BUILD_TIME)
 release: LDFLAGS += -X $(PKG)/pkg/command.GoVersion=$(GO_VERSION)
 release:
-	@echo "Building binaries..."
-	@gox \
-		-osarch "$(TARGETS)" \
-		-ldflags "$(LDFLAGS)" \
-		-output "./bin/openGauss-webclient_{{.OS}}_{{.Arch}}"
-
-	@echo "Building ARM binaries..."
-	GOOS=linux GOARCH=arm GOARM=5 go build -ldflags "$(LDFLAGS)" -o "./bin/openGauss-webclient_linux_arm_v5"
-
-	@echo "Building ARM64 binaries..."
-	GOOS=linux GOARCH=arm64 GOARM=7 go build -ldflags "$(LDFLAGS)" -o "./bin/openGauss-webclient_linux_arm64_v7"
+	@echo "Building amd64 binaries..."
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o "./bin/openGauss-webclient_linux_amd64"
 
 	@echo "\nPackaging binaries...\n"
 	@./script/package.sh
-
-bootstrap:
-	gox -build-toolchain
 
 setup:
 	go install github.com/mitchellh/gox@v1.0.1
