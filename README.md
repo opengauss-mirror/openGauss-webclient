@@ -64,10 +64,10 @@ SESSIONS=1 openGauss-webclient
 
 ## Build from source
 
-Go 1.7 is required. You can install Go with honebrew:
+Go 1.7 is required. You can install Go with `DNF`:
 
 ```
-brew install go
+dnf install -y golang
 ```
 
 To compile source code run the following command:
@@ -83,7 +83,7 @@ There's also a task to compile banaries for other operating system:
 make release
 ```
 
-Under the hood it uses gox. Compiled binaries will be stored into ./bin directory.
+Compiled binaries will be stored into ./bin directory.
 
 
 ## Testing
