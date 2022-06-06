@@ -1,17 +1,6 @@
 --
 -- Selected TOC Entries:
 --
---
--- TOC Entry ID 1 (OID 0)
---
--- Name: booktown Type: DATABASE Owner: postgres
---
-
-DROP DATABASE IF EXISTS "booktown";
-CREATE DATABASE "booktown";
-
-\connect booktown postgres
---
 -- TOC Entry ID 2 (OID 2991542)
 --
 -- Name: DATABASE "booktown" Type: COMMENT Owner: 
@@ -461,7 +450,7 @@ CREATE TABLE "money_example" (
 --
 
 CREATE TABLE "shipments" (
-	"id" integer DEFAULT nextval('"shipments_ship_id_seq"'::text) NOT NULL,
+	"id" integer NOT NULL,
 	"customer_id" integer,
 	"isbn" text,
 	"ship_date" timestamp with time zone
@@ -1025,10 +1014,11 @@ CREATE SEQUENCE "author_ids" start 0 increment 1 maxvalue 2147483647 minvalue 0 
 -- Name: distinguished_authors Type: TABLE Owner: manager
 --
 
-CREATE TABLE "distinguished_authors" (
-	"award" text
-)
-INHERITS ("authors");
+--- This syntax is not supported yet by openGauss
+---CREATE TABLE "distinguished_authors" (
+---	"award" text
+---)
+---INHERITS ("authors");
 
 --
 -- TOC Entry ID 107 (OID 3726476)
@@ -1293,7 +1283,7 @@ CREATE VIEW "recent_shipments" as SELECT count(*) AS num_shipped, max(shipments.
 
 
 COPY "publishers"  FROM stdin;
-150	Kids Can Press	Kids Can Press, 29 Birch Ave. Toronto, ON  M4V 1E2
+150	Kids Can Press	Kids Can Press, 29 Birch Ave. Toronto,ï¿½ONï¿½ï¿½M4V 1E2
 91	Henry Holt & Company, Inc.	Henry Holt & Company, Inc. 115 West 18th Street New York, NY 10011
 113	O'Reilly & Associates	O'Reilly & Associates, Inc. 101 Morris St, Sebastopol, CA 95472
 62	Watson-Guptill Publications	1515 Boradway, New York, NY 10036
@@ -1633,10 +1623,10 @@ COPY "books"  FROM stdin;
 --
 
 
-COPY "distinguished_authors"  FROM stdin;
-25043	Simon	Neil	Pulitzer Prize
-1809	Geisel	Theodor Seuss	Pulitzer Prize
-\.
+---COPY "distinguished_authors"  FROM stdin;
+---25043	Simon	Neil	Pulitzer Prize
+---1809	Geisel	Theodor Seuss	Pulitzer Prize
+---\.
 --
 -- Data for TOC Entry ID 129 (OID 3727889)
 --
