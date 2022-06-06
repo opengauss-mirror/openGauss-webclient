@@ -8,7 +8,7 @@
   left: 250px;
   right: 0;
   height: 50px;
-  background: #79589f;
+  background: #7d32ea;
 }
 
 #nav ul {
@@ -84,7 +84,7 @@
   font-weight: bold;
   font-size: 14px;
   color: #fff;
-  background: #79589f;
+  background: #7d32ea;
   z-index: 900;
 }
 
@@ -122,7 +122,7 @@
 
 #sidebar .current-database input.typeahead {
   display: none;
-  background: #79589f;
+  background: #7d32ea;
   width: 200px;
   height: 22px;
   color: #fff;
@@ -323,8 +323,8 @@
 }
 
 #input .actions .btn-primary {
-  border-color: #7eb54e;
-  color: #7eb54e;
+  border-color: #7d32ea;
+  color: #7d32ea;
 }
 
 #input .actions .btn:hover {
@@ -334,8 +334,8 @@
 }
 
 #input .actions .btn-primary:hover {
-  color: #64903e;
-  border-color: #64903e;
+  color: #7d32ea;
+  border-color: #7d32ea;
 }
 
 #input .actions #query_progress {
@@ -424,7 +424,7 @@
 }
 
 #pagination .filters select.filter {
-  width: 100px;
+  width: 130px;
 }
 
 #pagination .filters input {
@@ -437,8 +437,8 @@
 }
 
 #pagination .filters .btn-primary {
-  border-color: #7eb54e;
-  color: #7eb54e;
+  border-color: #7d32ea;
+  color: #7d32ea;
   background: #fff;
   outline: none;
   float: left;
@@ -601,7 +601,7 @@
 }
 
 #edit_connection, #close_connection {
-  background: #79589f;
+  background: #7d32ea;
   color: #fff;
   border-color: #fff;
 }

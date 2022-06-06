@@ -31,13 +31,8 @@
         <li id="table_query" class="selected">查询</li>
         <li id="table_history">操作历史</li>
         <li id="table_activity">活动历史</li>
-        <li id="table_connection">链接信息</li>
       </ul>
 
-      <div class="connection-actions">
-        <a href="#" id="edit_connection" class="btn btn-default btn-sm"><i class="fa fa-database"></i>编辑链接</a>
-        <a href="#" id="close_connection" class="btn btn-default btn-sm">断开链接</a>
-      </div>
     </div>
     <div id="sidebar">
       <div class="current-database">
@@ -121,7 +116,7 @@
             <option value="null">IS NULL</option>
             <option value="not_null">NOT NULL</option>
           </select>
-          <input type="text" class="form-control" placeholder="Filter value" id="table_filter_value" />
+          <input type="text" class="form-control" placeholder="过滤值" id="table_filter_value" />
           <button class="btn btn-primary btn-sm apply-filters" type="submit">应用</button>
           <button class="btn btn-default btn-sm reset-filters"><i class="fa fa-times"></i></button>
         </form>
