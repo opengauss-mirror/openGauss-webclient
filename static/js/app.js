@@ -806,7 +806,7 @@ function buildTableFilters(name, type) {
       $("#pagination .filters").show();
     }
 
-    $("#pagination select.column").html("<option value='' selected>Select column</option>");
+    $("#pagination select.column").html("<option value='' selected>选择列</option>");
 
     for (var i = 0; i < data.rows.length; i++) {
       var row = data.rows[i];
