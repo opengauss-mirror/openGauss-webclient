@@ -89,7 +89,7 @@ Compiled binaries will be stored into ./bin directory.
 ## Testing
 
 Before running tests, make sure you have openGauss server running on `localhost:5432`
-interface. Also, you must have `postgres` user that could create new databases
+interface. Also, you must have `openGauss` user with password `Gaussdb_123` that could create new databases
 in your local environment. openGauss-webclient server should not be running at the same time.
 
 Execute test suite:

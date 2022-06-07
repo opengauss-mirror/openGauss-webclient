@@ -160,7 +160,7 @@ func initOptions() {
 }
 
 func printVersion() {
-	chunks := []string{fmt.Sprintf("Pgweb v%s", command.Version)}
+	chunks := []string{fmt.Sprintf("openGauss-webclient v%s", command.Version)}
 
 	if command.GitCommit != "" {
 		chunks = append(chunks, fmt.Sprintf("(git: %s)", command.GitCommit))

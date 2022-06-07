@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sort"
 	"testing"
 	"time"
 
@@ -29,6 +30,7 @@ func mapKeys(data map[string]*Objects) []string {
 	for k, _ := range data {
 		result = append(result, k)
 	}
+	sort.Strings(result)
 	return result
 }
 
@@ -54,16 +56,14 @@ func initVars() {
 
 	serverHost = getVar("PGHOST", "localhost")
 	serverPort = getVar("PGPORT", "5432")
-	serverUser = getVar("PGUSER", "postgres")
-	serverPassword = getVar("PGPASSWORD", "postgres")
-	serverDatabase = getVar("PGDATABASE", "booktown")
+	serverUser = getVar("PGUSER", "openGauss")
+	serverPassword = getVar("PGPASSWORD", "Gaussdb_123")
+	serverDatabase = getVar("PGDATABASE", "opengauss_test_booktown")
 }
 
 func setupCommands() {
 	testCommands = map[string]string{
-		"createdb": "createdb",
-		"psql":     "psql",
-		"dropdb":   "dropdb",
+		"gsql": "gsql",
 	}
 
 	if onWindows() {
@@ -82,11 +82,13 @@ func setup() {
 	command.Opts.DisablePrettyJSON = true
 
 	out, err := exec.Command(
-		testCommands["createdb"],
+		testCommands["gsql"],
 		"-U", serverUser,
+		"-d", "postgres",
 		"-h", serverHost,
 		"-p", serverPort,
-		serverDatabase,
+		"-W", serverPassword,
+		"-c", "CREATE DATABASE "+serverDatabase,
 	).CombinedOutput()
 
 	if err != nil {
@@ -96,10 +98,11 @@ func setup() {
 	}
 
 	out, err = exec.Command(
-		testCommands["psql"],
+		testCommands["gsql"],
 		"-U", serverUser,
 		"-h", serverHost,
 		"-p", serverPort,
+		"-W", serverPassword,
 		"-f", "../../data/booktown.sql",
 		serverDatabase,
 	).CombinedOutput()
@@ -112,7 +115,7 @@ func setup() {
 }
 
 func setupClient() {
-	url := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable", serverUser, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	testClient, _ = NewFromUrl(url, nil)
 }
 
@@ -124,11 +127,13 @@ func teardownClient() {
 
 func teardown() {
 	_, err := exec.Command(
-		testCommands["dropdb"],
+		testCommands["gsql"],
 		"-U", serverUser,
+		"-d", "postgres",
 		"-h", serverHost,
 		"-p", serverPort,
-		serverDatabase,
+		"-W", serverPassword,
+		"-c", "DROP DATABASE IF EXISTS "+serverDatabase,
 	).CombinedOutput()
 
 	if err != nil {
@@ -137,19 +142,7 @@ func teardown() {
 }
 
 func testNewClientFromUrl(t *testing.T) {
-	url := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable", serverUser, serverHost, serverPort, serverDatabase)
-	client, err := NewFromUrl(url, nil)
-
-	if err != nil {
-		defer client.Close()
-	}
-
-	assert.Equal(t, nil, err)
-	assert.Equal(t, url, client.ConnectionString)
-}
-
-func testNewClientFromUrl2(t *testing.T) {
-	url := fmt.Sprintf("postgresql://%s@%s:%s/%s?sslmode=disable", serverUser, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	client, err := NewFromUrl(url, nil)
 
 	if err != nil {
@@ -197,7 +190,7 @@ func testDatabases(t *testing.T) {
 	res, err := testClient.Databases()
 
 	assert.Equal(t, nil, err)
-	assert.Contains(t, res, "booktown")
+	assert.Contains(t, res, "opengauss_test_booktown")
 	assert.Contains(t, res, "postgres")
 }
 
@@ -213,7 +206,6 @@ func testObjects(t *testing.T) {
 		"books",
 		"customers",
 		"daily_inventory",
-		"distinguished_authors",
 		"dummies",
 		"editions",
 		"employees",
@@ -234,7 +226,7 @@ func testObjects(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, []string{"schema", "name", "type", "owner", "comment"}, res.Columns)
-	assert.Equal(t, []string{"public"}, mapKeys(objects))
+	assert.Equal(t, []string{"db4ai", "dbe_perf", "dbe_pldeveloper", "public"}, mapKeys(objects))
 	assert.Equal(t, tables, objects["public"].Tables)
 	assert.Equal(t, []string{"recent_shipments", "stock_view"}, objects["public"].Views)
 	assert.Equal(t, []string{"author_ids", "book_ids", "shipments_ship_id_seq", "subject_ids"}, objects["public"].Sequences)
@@ -370,7 +362,7 @@ func testQueryInvalidTable(t *testing.T) {
 	res, err := testClient.Query("SELECT * FROM books2")
 
 	assert.NotEqual(t, nil, err)
-	assert.Equal(t, "pq: relation \"books2\" does not exist", err.Error())
+	assert.Contains(t, err.Error(), "pq: relation \"books2\" does not exist")
 	assert.Equal(t, true, res == nil)
 }
 
@@ -418,7 +410,7 @@ func testHistoryError(t *testing.T) {
 }
 
 func testHistoryUniqueness(t *testing.T) {
-	url := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable", serverUser, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	client, _ := NewFromUrl(url, nil)
 
 	client.Query("SELECT * FROM books WHERE id = 1")
@@ -434,7 +426,7 @@ func testReadOnlyMode(t *testing.T) {
 		command.Opts.ReadOnly = false
 	}()
 
-	url := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable", serverUser, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	client, _ := NewFromUrl(url, nil)
 
 	err := client.SetReadOnlyMode()
@@ -496,7 +488,8 @@ func TestAll(t *testing.T) {
 	testHistoryUniqueness(t)
 	testHistoryError(t)
 	testReadOnlyMode(t)
-	testDumpExport(t)
+	//TODO:support gs_dump of openGauss
+	//testDumpExport(t)
 
 	teardownClient()
 	teardown()
