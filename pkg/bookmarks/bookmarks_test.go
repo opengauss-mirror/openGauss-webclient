@@ -3,8 +3,8 @@ package bookmarks
 import (
 	"testing"
 
-	"github.com/sosedoff/pgweb/pkg/command"
-	"github.com/sosedoff/pgweb/pkg/shared"
+	"gitee.com/openGauss/openGauss-webclient/pkg/command"
+	"gitee.com/openGauss/openGauss-webclient/pkg/shared"
 	"github.com/stretchr/testify/assert"
 )
 

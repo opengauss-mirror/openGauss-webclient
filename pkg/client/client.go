@@ -26,6 +26,9 @@ var (
 
 	cockroachSignature = regexp.MustCompile(`(?i)cockroachdb ccl v([\d\.]+)\s`)
 	cockroachType      = "CockroachDB"
+
+	openGaussSignature = regexp.MustCompile(`(?i)openGauss ([\d\.]+)\s`)
+	openGaussType      = "PostgreSQL"
 )
 
 type Client struct {
@@ -162,6 +165,13 @@ func (client *Client) setServerVersion() {
 	matches = cockroachSignature.FindAllStringSubmatch(version, 1)
 	if len(matches) > 0 {
 		client.serverType = cockroachType
+		client.serverVersion = matches[0][1]
+		return
+	}
+
+	matches = openGaussSignature.FindAllStringSubmatch(version, 1)
+	if len(matches) > 0 {
+		client.serverType = postgresType
 		client.serverVersion = matches[0][1]
 		return
 	}
