@@ -1736,10 +1736,12 @@ function goAuthorize(data, cb) {
   }
   $.ajax({
     type: "POST",
-    url: "",
-    data: "",
-    success: function () {
-      cb();
+    url: "https://opengaussplayground.test.osinfra.cn/api/playground/users/checkSubdomain",
+    data: { token: data.token, subdomain: data.subdomain },
+    success: function (data) {
+      if (data.code === 200) {
+        cb();
+      }
     },
     error: function () {
       console.error("client用户信息错误！");
