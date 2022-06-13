@@ -357,7 +357,7 @@ function performViewAction(view, action, el) {
 
 function performRowAction(action, value) {
   if (action == "stop_query") {
-    if (!confirm("Are you sure you want to stop the query?")) return;
+    if (!confirm("确认终止查询?")) return;
     executeQuery("SELECT pg_cancel_backend(" + value + ");", function (data) {
       if (data.error) alert(data.error);
       setTimeout(showActivityPanel, 1000);
@@ -493,7 +493,7 @@ function showTableIndexes() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
@@ -511,7 +511,7 @@ function showTableConstraints() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
@@ -529,7 +529,7 @@ function showTableInfo() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
@@ -578,7 +578,7 @@ function showTableContent(sortColumn, sortOrder) {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
@@ -634,7 +634,7 @@ function showTableStructure() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
@@ -1562,7 +1562,7 @@ function start() {
   });
 
   $("#close_connection").on("click", function () {
-    if (!confirm("Are you sure you want to disconnect?")) return;
+    if (!confirm("确认断开链接?")) return;
 
     disconnect(function () {
       showConnectionSettings();
