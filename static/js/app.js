@@ -1729,15 +1729,16 @@ function start() {
 }
 
 function goAuthorize(data, cb) {
-  const id = data.id;
   const token = data.token;
-  if (!id || !token) {
+  const subdomain = data.subdomain;
+  if (!token || !subdomain) {
     console.error("用户信息错误！");
   }
   $.ajax({
     type: "POST",
     url: "https://opengaussplayground.test.osinfra.cn/api/playground/users/checkSubdomain",
-    data: { token: data.token, subdomain: data.subdomain },
+    contentType: "application/json;charset=UTF-8",
+    data: JSON.stringify({ token: data.token, subdomain: data.subdomain }),
     success: function (data) {
       if (data.code === 200) {
         cb();
@@ -1762,6 +1763,6 @@ function handleMessage(e) {
 }
 
 $(document).ready(function () {
+  // window.postMessage({ status: "ready" });
   window.addEventListener("message", handleMessage);
-  // start();
 });
