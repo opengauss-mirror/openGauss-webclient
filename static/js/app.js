@@ -1558,14 +1558,14 @@ function start() {
       $("#close_connection_window").show();
     }
 
-    showConnectionSettings();
+    //showConnectionSettings();
   });
 
   $("#close_connection").on("click", function () {
     if (!confirm("确认断开链接?")) return;
 
     disconnect(function () {
-      showConnectionSettings();
+      //showConnectionSettings();
       resetTable();
       $("#close_connection_window").hide();
     });
@@ -1710,8 +1710,9 @@ function start() {
   apiCall("get", "/connection", {}, function (resp) {
     if (resp.error) {
       connected = false;
-      showConnectionSettings();
-      $(".connection-actions").show();
+      console.error("connection error: %s", resp.error);
+      //showConnectionSettings();
+      //$(".connection-actions").show();
     } else {
       connected = true;
       loadSchemas();
@@ -1719,9 +1720,9 @@ function start() {
       $("#current_database").text(resp.current_database);
       $("#main").show();
 
-      if (!resp.session_lock) {
-        $(".connection-actions").show();
-      }
+      //if (!resp.session_lock) {
+      //  $(".connection-actions").show();
+      //}
     }
   });
 
