@@ -2,7 +2,7 @@ package command
 
 const (
 	// Version is the current Pgweb application version
-	Version = "0.4.0"
+	Version = "0.5.0"
 )
 
 var (
