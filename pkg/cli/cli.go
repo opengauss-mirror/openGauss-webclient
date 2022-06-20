@@ -227,10 +227,6 @@ func Run() {
 	initOptions()
 	initClient()
 
-	if api.DbClient != nil {
-		defer api.DbClient.Close()
-	}
-
 	if !options.Debug {
 		gin.SetMode("release")
 	}

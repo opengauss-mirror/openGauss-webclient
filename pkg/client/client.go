@@ -28,7 +28,7 @@ var (
 	cockroachType      = "CockroachDB"
 
 	openGaussSignature = regexp.MustCompile(`(?i)openGauss ([\d\.]+)\s`)
-	openGaussType      = "PostgreSQL"
+	openGaussType      = "openGauss"
 )
 
 type Client struct {
@@ -171,7 +171,7 @@ func (client *Client) setServerVersion() {
 
 	matches = openGaussSignature.FindAllStringSubmatch(version, 1)
 	if len(matches) > 0 {
-		client.serverType = postgresType
+		client.serverType = openGaussType
 		client.serverVersion = matches[0][1]
 		return
 	}
@@ -248,7 +248,7 @@ func (client *Client) EstimatedTableRowsCount(table string, opts RowsOptions) (*
 
 func (client *Client) TableRowsCount(table string, opts RowsOptions) (*Result, error) {
 	// Return postgres estimated rows count on empty filter
-	if opts.Where == "" && client.serverType == postgresType {
+	if opts.Where == "" && (client.serverType == postgresType || client.serverType == openGaussType) {
 		res, err := client.EstimatedTableRowsCount(table, opts)
 		if err != nil {
 			return nil, err
