@@ -1737,7 +1737,7 @@ function goAuthorize(data, cb) {
   }
   $.ajax({
     type: "POST",
-    url: "https://opengaussplayground.test.osinfra.cn/api/playground/users/checkSubdomain",
+    url: "https://tryme.opengauss.org/api/playground/users/checkSubdomain",
     contentType: "application/json;charset=UTF-8",
     data: JSON.stringify({ token: data.token, subdomain: data.subdomain }),
     success: function (data) {
