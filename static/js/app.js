@@ -96,7 +96,7 @@ function apiCall(method, path, params, cb) {
       if (status == "timeout") {
         return cb({ error: "执行超时： " + timeout / 1000 + "s" });
       }
-      cb({ error: "抱歉，发生未知异常！"});
+      cb({ error: "抱歉，发生未知异常！" });
     },
   });
 }
@@ -287,7 +287,7 @@ function resetTable() {
 function performTableAction(table, action, el) {
   if (action == "truncate" || action == "delete") {
     var message = "确认要";
-    message += (action == "truncate" ? "清空" : "删除");
+    message += action == "truncate" ? "清空" : "删除";
     message += "表 " + table + " ?";
     if (!confirm(message)) return;
   }
@@ -501,7 +501,10 @@ function showQueryHistory() {
       rows.unshift([parseInt(i) + 1, data[i].query, data[i].timestamp]);
     }
 
-    buildTable({ columns: ["id", "query", "timestamp"], rows: rows }, OperateAction.SHOW_QUERY_HISTORY);
+    buildTable(
+      { columns: ["id", "query", "timestamp"], rows: rows },
+      OperateAction.SHOW_QUERY_HISTORY
+    );
 
     setCurrentTab("table_history");
     $("#input").hide();
@@ -692,7 +695,10 @@ function showConnectionPanel() {
       rows.push([key, data[key]]);
     }
 
-    buildTable({columns: ["attribute", "value"], rows: rows,}, OperateAction.SHOW_CONNECTION_PANEL);
+    buildTable(
+      { columns: ["attribute", "value"], rows: rows },
+      OperateAction.SHOW_CONNECTION_PANEL
+    );
 
     $("#input").hide();
     $("#body").addClass("full");
@@ -1749,14 +1755,15 @@ function start() {
 }
 
 function goAuthorize(data, cb) {
-  const token = data.token;
-  const subdomain = data.subdomain;
+  var token = data.token;
+  var domain = data.domain;
+  var subdomain = data.subdomain;
   if (!token || !subdomain) {
     console.error("用户信息错误！");
   }
   $.ajax({
     type: "POST",
-    url: "https://tryme.opengauss.org/api/playground/users/checkSubdomain",
+    url: "https://" + domain + "/api/playground/users/checkSubdomain",
     contentType: "application/json;charset=UTF-8",
     data: JSON.stringify({ token: data.token, subdomain: data.subdomain }),
     success: function (data) {
@@ -1783,7 +1790,6 @@ function handleMessage(e) {
 }
 
 $(document).ready(function () {
-  //window.postMessage({ status: "ready" });
   //start();
   window.addEventListener("message", handleMessage);
 });
