@@ -177,6 +177,10 @@ func (client *Client) setServerVersion() {
 	}
 }
 
+func (client *Client) SetApplicationName() (*Result, error) {
+	return client.query(statements.SetApplication)
+}
+
 func (client *Client) Test() error {
 	return client.db.Ping()
 }
@@ -361,7 +365,7 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 	}
 
 	action := strings.ToLower(strings.Split(query, " ")[0])
-	if action == "update" || action == "delete" {
+	if action == "update" || action == "delete" || action == "insert" {
 		res, err := client.db.Exec(query, args...)
 		if err != nil {
 			return nil, err

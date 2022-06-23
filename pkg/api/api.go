@@ -34,6 +34,7 @@ func DB(c *gin.Context) *client.Client {
 	if command.Opts.Sessions {
 		return DbSessions[getSessionId(c.Request)]
 	}
+	DbClient.SetApplicationName()
 	return DbClient
 }
 
@@ -121,6 +122,7 @@ func ConnectWithBackend(c *gin.Context) {
 	}
 	cl.External = true
 
+	cl.SetApplicationName()
 	// Finalize session seetup
 	_, err = cl.Info()
 	if err == nil {
@@ -174,6 +176,8 @@ func Connect(c *gin.Context) {
 		badRequest(c, err)
 		return
 	}
+
+	cl.SetApplicationName()
 
 	info, err := cl.Info()
 	if err == nil {
@@ -234,6 +238,8 @@ func SwitchDb(c *gin.Context) {
 		badRequest(c, err)
 		return
 	}
+
+	cl.SetApplicationName()
 
 	info, err := cl.Info()
 	if err == nil {
@@ -472,7 +478,7 @@ func HandleQuery(query string, c *gin.Context) {
 	filename := getQueryParam(c, "filename")
 
 	if filename == "" {
-		filename = fmt.Sprintf("pgweb-%v.%v", time.Now().Unix(), format)
+		filename = fmt.Sprintf("openGauss-webclient-%v.%v", time.Now().Unix(), format)
 	}
 
 	if format != "" {
