@@ -25,12 +25,12 @@
     <div id="nav">
       <ul>
         <li id="table_content">数据</li>
-        <li id="table_structure">数据表结构</li>
+        <li id="table_structure">表结构</li>
         <li id="table_indexes">索引</li>
         <li id="table_constraints">约束</li>
-        <li id="table_query" class="selected">查询</li>
+        <li id="table_query" class="selected">SQL操作</li>
         <li id="table_history">操作历史</li>
-        <li id="table_activity">活动历史</li>
+        <li id="table_activity">会话</li>
       </ul>
 
     </div>
@@ -38,15 +38,17 @@
       <div class="current-database">
         <div class="wrap">
           <i class="fa fa-database"></i> <span class="current-database-name" id="current_database"></span>
+          <!-- for now we don't support database switch
           <input class="typeahead" id="database_search" type="text" placeholder="Search database" autocomplete="off" />
           <span class="refresh" id="refresh_tables" title="Refresh tables list"><i class="fa fa-refresh"></i></span>
+          -->
         </div>
       </div>
       <div class="objects-search">
         <div class="wrap">
           <i class="fa fa-search"></i>
           <i class="fa fa-times-circle clear-objects-filter"></i>
-          <input type="text" placeholder="Filter database objects" id="filter_database_objects" />
+          <input type="text" placeholder="过滤数据库对象" id="filter_database_objects" />
         </div>
       </div>
       <div class="tables-list">
@@ -81,7 +83,7 @@
                 <li><a href="#" id="analyze">分析查询</a></li>
               </ul>
             </div>
-            <div id="query_progress">请稍后，查询执行中...</div>
+            <div id="query_progress">执行中...</div>
             <div class="pull-right">
               <span id="result-rows-count"></span>
               <input type="button" id="json" value="JSON" class="btn btn-sm btn-default" />
@@ -279,13 +281,13 @@
   </div>
   <div id="view_context_menu">
     <ul class="dropdown-menu" role="menu">
-      <li><a href="#" data-action="copy">Copy View Name</a></li>
+      <li><a href="#" data-action="copy">复制视图名</a></li>
       <li class="divider"></li>
-      <li><a href="#" data-action="export" data-format="json">Export to JSON</a></li>
-      <li><a href="#" data-action="export" data-format="csv">Export to CSV</a></li>
-      <li><a href="#" data-action="export" data-format="xml">Export to XML</a></li>
+      <li><a href="#" data-action="export" data-format="json">导出为JSON文件</a></li>
+      <li><a href="#" data-action="export" data-format="csv">导出为CSV文件</a></li>
+      <li><a href="#" data-action="export" data-format="xml">导出为XML文件</a></li>
       <li class="divider"></li>
-      <li><a href="#" data-action="delete">Delete View</a></li>
+      <li><a href="#" data-action="delete">删除视图</a></li>
     </ul>
   </div>
   <div id="current_database_context_menu">

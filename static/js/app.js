@@ -18,6 +18,29 @@ var filterOptions = {
   not_null: "IS NOT NULL",
 };
 
+class OperateAction {
+  static SHOW_QUERY_HISTORY = new OperateAction("操作历史为空");
+  static SHOW_TABLE_INDEX = new OperateAction("无索引");
+  static SHOW_TABLE_CONSTRAINTS = new OperateAction("无约束");
+  static SHOW_TABLE_CONTENT = new OperateAction("无数据");
+  static SHOW_TABLE_STRUCTURE = new OperateAction("表结构为空");
+  static SHOW_CONNECTION_PANEL = new OperateAction("show connection panel");
+  static SHOW_ACTIVITY_PANEL = new OperateAction("会话为空");
+  static EXECUTE_QUERY = new OperateAction("执行成功");
+  static EXECUTE_EXPLAIN = new OperateAction("execute explain");
+  static EXECUTE_ANALYZE = new OperateAction("execute analyze");
+  static SHOW_UNIQ_COLUMN_VALUES = new OperateAction("show uniq column values");
+  static SHOW_FILED_NUM_STATS = new OperateAction("show field num stats");
+
+  constructor(empty_message) {
+    this.empty_message = empty_message;
+  }
+
+  toString() {
+    return this.empty_message;
+  }
+}
+
 function getSessionId() {
   var id = sessionStorage.getItem("session_id");
 
@@ -71,10 +94,9 @@ function apiCall(method, path, params, cb) {
     },
     error: function (xhr, status, data) {
       if (status == "timeout") {
-        return cb({ error: "Query timeout after " + timeout / 1000 + "s" });
+        return cb({ error: "执行超时： " + timeout / 1000 + "s" });
       }
-
-      cb(jQuery.parseJSON(xhr.responseText));
+      cb({ error: "抱歉，发生未知异常！"});
     },
   });
 }
@@ -264,8 +286,9 @@ function resetTable() {
 
 function performTableAction(table, action, el) {
   if (action == "truncate" || action == "delete") {
-    var message =
-      "Are you sure you want to " + action + " table " + table + " ?";
+    var message = "确认要";
+    message += (action == "truncate" ? "清空" : "删除");
+    message += "表 " + table + " ?";
     if (!confirm(message)) return;
   }
 
@@ -319,7 +342,7 @@ function performTableAction(table, action, el) {
 
 function performViewAction(view, action, el) {
   if (action == "delete") {
-    var message = "Are you sure you want to " + action + " view " + view + " ?";
+    var message = "确认要删除视图 " + view + " ?";
     if (!confirm(message)) return;
   }
 
@@ -376,10 +399,7 @@ function sortArrow(direction) {
   }
 }
 
-function buildTable(results, sortColumn, sortOrder, options) {
-  if (!options) options = {};
-  var action = options.action;
-
+function buildTable(results, action, sortColumn, sortOrder) {
   resetTable();
 
   if (results.error) {
@@ -388,9 +408,10 @@ function buildTable(results, sortColumn, sortOrder, options) {
     return;
   }
 
+  var show_message = action.toString();
   if (results.rows.length == 0) {
     $("#results_header").html("");
-    $("#results_body").html("<tr><td>No records found</td></tr>");
+    $("#results_body").html("<tr><td>" + show_message + "</td></tr>");
     $("#result-rows-count").html("");
     $("#results").addClass("empty");
     return;
@@ -419,12 +440,11 @@ function buildTable(results, sortColumn, sortOrder, options) {
   });
 
   // No header to make the column non-sortable
-  if (action) {
-    cols += "<th></th>";
-
-    // Determine which column contains the data attribute
-    action.dataColumn = results.columns.indexOf(action.data);
-  }
+  // if (action) {
+  //   cols += "<th></th>";
+  //   // Determine which column contains the data attribute
+  //   action.dataColumn = results.columns.indexOf(action.data);
+  // }
 
   results.rows.forEach(function (row) {
     var r = "";
@@ -435,19 +455,20 @@ function buildTable(results, sortColumn, sortOrder, options) {
         "<td data-col='" + i + "'><div>" + escapeHtml(row[i]) + "</div></td>";
     }
 
-    // Add row action button
-    if (action) {
-      r +=
-        "<td><a class='btn btn-xs btn-" +
-        action.style +
-        " row-action' data-action='" +
-        action.name +
-        "' data-value='" +
-        row[action.dataColumn] +
-        "' href='#'>" +
-        action.title +
-        "</a></td>";
-    }
+    // for tryme project, we are not suppposed to do ANY ACTION on ANY CONTENTS
+    // Add row action button.
+    // if (action) {
+    //   r +=
+    //     "<td><a class='btn btn-xs btn-" +
+    //     action.style +
+    //     " row-action' data-action='" +
+    //     action.name +
+    //     "' data-value='" +
+    //     row[action.dataColumn] +
+    //     "' href='#'>" +
+    //     action.title +
+    //     "</a></td>";
+    // }
 
     rows += "<tr>" + r + "</tr>";
   });
@@ -455,8 +476,8 @@ function buildTable(results, sortColumn, sortOrder, options) {
   $("#results_header").html(cols);
   $("#results_body").html(rows);
 
-  // Show number of rows rendered on the page
-  $("#result-rows-count").html(results.rows.length + " rows");
+  // Show number of rows rendered on the page.
+  //$("#result-rows-count").html(results.rows.length + " rows");
 }
 
 function setCurrentTab(id) {
@@ -480,7 +501,7 @@ function showQueryHistory() {
       rows.unshift([parseInt(i) + 1, data[i].query, data[i].timestamp]);
     }
 
-    buildTable({ columns: ["id", "query", "timestamp"], rows: rows });
+    buildTable({ columns: ["id", "query", "timestamp"], rows: rows }, OperateAction.SHOW_QUERY_HISTORY);
 
     setCurrentTab("table_history");
     $("#input").hide();
@@ -499,7 +520,7 @@ function showTableIndexes() {
 
   getTableIndexes(name, function (data) {
     setCurrentTab("table_indexes");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_TABLE_INDEX);
 
     $("#input").hide();
     $("#body").prop("class", "full");
@@ -517,7 +538,7 @@ function showTableConstraints() {
 
   getTableConstraints(name, function (data) {
     setCurrentTab("table_constraints");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_TABLE_CONSTRAINTS);
 
     $("#input").hide();
     $("#body").prop("class", "full");
@@ -609,7 +630,7 @@ function showTableContent(sortColumn, sortOrder) {
     $("#input").hide();
     $("#body").prop("class", "with-pagination");
 
-    buildTable(data, sortColumn, sortOrder);
+    buildTable(data, OperateAction.SHOW_TABLE_CONTENT, sortColumn, sortOrder);
     setCurrentTab("table_content");
     updatePaginator(data.pagination);
 
@@ -644,7 +665,7 @@ function showTableStructure() {
   $("#body").prop("class", "full");
 
   getTableStructure(name, { type: getCurrentObject().type }, function (data) {
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_TABLE_STRUCTURE);
     $("#results").addClass("no-crop");
   });
 }
@@ -671,10 +692,7 @@ function showConnectionPanel() {
       rows.push([key, data[key]]);
     }
 
-    buildTable({
-      columns: ["attribute", "value"],
-      rows: rows,
-    });
+    buildTable({columns: ["attribute", "value"], rows: rows,}, OperateAction.SHOW_CONNECTION_PANEL);
 
     $("#input").hide();
     $("#body").addClass("full");
@@ -682,18 +700,19 @@ function showConnectionPanel() {
 }
 
 function showActivityPanel() {
-  var options = {
-    action: {
-      name: "stop_query",
-      title: "stop",
-      data: "pid",
-      style: "danger",
-    },
-  };
+  // for now, we donnot expose the dangerous STOP button
+  // var options = {
+  //   action: {
+  //     name: "stop_query",
+  //     title: "stop",
+  //     data: "pid",
+  //     style: "danger",
+  //   },
+  // };
 
   setCurrentTab("table_activity");
   apiCall("get", "/activity", {}, function (data) {
-    buildTable(data, null, null, options);
+    buildTable(data, OperateAction.SHOW_ACTIVITY_PANEL);
     $("#input").hide();
     $("#body").addClass("full");
   });
@@ -790,7 +809,7 @@ function runQuery() {
   }
 
   executeQuery(query, function (data) {
-    buildTable(data);
+    buildTable(data, OperateAction.EXECUTE_QUERY);
 
     hideQueryProgressMessage();
     $("#input").show();
@@ -819,7 +838,7 @@ function runExplain() {
   }
 
   explainQuery(query, function (data) {
-    buildTable(data);
+    buildTable(data, OperateAction.EXECUTE_EXPLAIN);
 
     hideQueryProgressMessage();
     $("#input").show();
@@ -839,7 +858,7 @@ function runAnalyze() {
   }
 
   analyzeQuery(query, function (data) {
-    buildTable(data);
+    buildTable(data, OperateAction.EXECUTE_ANALYZE);
 
     hideQueryProgressMessage();
     $("#input").show();
@@ -889,7 +908,7 @@ function showUniqueColumnsValues(table, column, showCounts) {
     $("#input").hide();
     $("#body").prop("class", "full");
     $("#results").data("mode", "query");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_UNIQ_COLUMN_VALUES);
   });
 }
 
@@ -909,7 +928,7 @@ function showFieldNumStats(table, column) {
     $("#input").hide();
     $("#body").prop("class", "full");
     $("#results").data("mode", "query");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_FILED_NUM_STATS);
   });
 }
 
@@ -1533,12 +1552,12 @@ function start() {
     }
   });
 
-  $("#current_database").on("click", function (e) {
-    apiCall("get", "/databases", {}, function (resp) {
-      toggleDatabaseSearch();
-      enableDatabaseSearch(resp);
-    });
-  });
+  // $("#current_database").on("click", function (e) {
+  //   apiCall("get", "/databases", {}, function (resp) {
+  //     toggleDatabaseSearch();
+  //     enableDatabaseSearch(resp);
+  //   });
+  // });
 
   $("#database_search").change(function (e) {
     var current = $("#database_search").typeahead("getActive");
@@ -1764,6 +1783,7 @@ function handleMessage(e) {
 }
 
 $(document).ready(function () {
-  // window.postMessage({ status: "ready" });
+  //window.postMessage({ status: "ready" });
+  //start();
   window.addEventListener("message", handleMessage);
 });

@@ -118,6 +118,9 @@ func initClient() {
 		fmt.Printf("Connected to %s\n", cl.ServerVersion())
 	}
 
+	fmt.Println("Set application name...")
+	cl.SetApplicationName()
+
 	fmt.Println("Checking database objects...")
 	_, err = cl.Objects()
 	if err != nil {
