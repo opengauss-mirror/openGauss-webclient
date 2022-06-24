@@ -432,6 +432,17 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 
 	result.PostProcess()
 
+	if len(result.Rows) == 0 {
+		result := Result{
+			Columns: []string{"Rows Returned"},
+			Rows: []Row{
+				Row{0},
+			},
+		}
+
+		return &result, nil
+	}
+
 	return &result, nil
 }
 
