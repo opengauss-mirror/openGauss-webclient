@@ -95,6 +95,8 @@ function apiCall(method, path, params, cb) {
     error: function (xhr, status, data) {
       if (status == "timeout") {
         return cb({ error: "执行超时： " + timeout / 1000 + "s" });
+      } else if (status == "error" && xhr.status == 400) {
+        return cb(jQuery.parseJSON(xhr.responseText))
       }
       cb({ error: "抱歉，发生未知异常！" });
     },
@@ -410,6 +412,9 @@ function buildTable(results, action, sortColumn, sortOrder) {
 
   var show_message = action.toString();
   if (results.rows.length == 0) {
+    if (action == OperateAction.EXECUTE_QUERY && results.action == "select") {
+      show_message = OperateAction.SHOW_TABLE_CONTENT.empty_message;
+    }
     $("#results_header").html("");
     $("#results_body").html("<tr><td>" + show_message + "</td></tr>");
     $("#result-rows-count").html("");
@@ -1587,12 +1592,18 @@ function start() {
   });
 
   $("#close_connection").on("click", function () {
-    if (!confirm("确认断开链接?")) return;
+    if (!confirm("确认退出?")) return;
 
     disconnect(function () {
-      //showConnectionSettings();
-      resetTable();
-      $("#close_connection_window").hide();
+      var userAgent = navigator.userAgent;
+      if (userAgent.indexOf("Firefox") != -1 || userAgent.indexOf("Chrome") != -1) {
+        window.location.href = "about:blank";
+        window.close();
+      } else {
+        window.opener = null;
+        window.open("", "_self");
+        window.close();
+      }
     });
   });
 
@@ -1745,9 +1756,9 @@ function start() {
       $("#current_database").text(resp.current_database);
       $("#main").show();
 
-      //if (!resp.session_lock) {
-      //  $(".connection-actions").show();
-      //}
+      if (!resp.session_lock) {
+        $(".connection-actions").show();
+      }
     }
   });
 
