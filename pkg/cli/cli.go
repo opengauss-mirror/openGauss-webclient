@@ -220,6 +220,7 @@ func openPage() {
 
 	_, err := exec.Command("which", "open").Output()
 	if err != nil {
+		fmt.Println("open command not exist, skip open page")
 		return
 	}
 

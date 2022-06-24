@@ -1,8 +1,8 @@
 package command
 
 const (
-	// Version is the current Pgweb application version
-	Version = "0.7.0"
+	// Version is the current openGauss-webclient application version
+	Version = "0.8.0"
 )
 
 var (

@@ -544,7 +544,7 @@ func DataExport(c *gin.Context) {
 
 	c.Header(
 		"Content-Disposition",
-		fmt.Sprintf(`attachment; filename="%s.sql.gz"`, cleanFilename),
+		fmt.Sprintf(`attachment; filename="%s.sql"`, cleanFilename),
 	)
 
 	err = dump.Export(db.ConnectionString, c.Writer)

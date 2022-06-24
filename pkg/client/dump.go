@@ -36,9 +36,11 @@ func (d *Dump) Export(connstr string, writer io.Writer) error {
 	errOutput := bytes.NewBuffer(nil)
 
 	opts := []string{
-		"--no-owner",      // skip restoration of object ownership in plain-text format
-		"--clean",         // clean (drop) database objects before recreating
-		"--compress", "6", // compression level for compressed formats
+		"openGauss",       // the database of which the table belongs
+		"-U", "openGauss", // the username gs_dump used to connect
+		"-W", "openGauss2022", // the password. CAUSION: password is set in initdb.sql
+		"--no-owner",
+		"--clean", // clean (drop) database objects before recreating
 	}
 
 	if d.Table != "" {
