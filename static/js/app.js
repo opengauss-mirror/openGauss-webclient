@@ -1789,7 +1789,6 @@ function goAuthorize(data, cb) {
 }
 
 var isAuthentic = false;
-
 function handleMessage(e) {
   if (!isAuthentic) {
     goAuthorize(e.data, function () {
@@ -1801,6 +1800,11 @@ function handleMessage(e) {
 }
 
 $(document).ready(function () {
-  //start();
-  window.addEventListener("message", handleMessage);
+  apiCall("get", "/debugmode", {}, function (resp) {
+    if (resp.error || !resp.debug_mode) {
+      window.addEventListener("message", handleMessage);
+    } else {
+      start();
+    }
+  });
 });
