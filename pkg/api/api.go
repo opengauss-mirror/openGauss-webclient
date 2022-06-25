@@ -552,3 +552,9 @@ func DataExport(c *gin.Context) {
 		badRequest(c, err)
 	}
 }
+
+func GetDebugMode(c *gin.Context) {
+	successResponse(c, gin.H{
+		"debug_mode": command.Opts.Debug,
+	})
+}
