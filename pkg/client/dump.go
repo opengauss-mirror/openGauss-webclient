@@ -2,10 +2,12 @@ package client
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -33,19 +35,24 @@ func (d *Dump) Export(connstr string, writer io.Writer) error {
 		connstr = str
 	}
 
+	username, password, err := parse_user_info(connstr)
+	if err != nil {
+		return err
+	}
+
 	errOutput := bytes.NewBuffer(nil)
 
 	opts := []string{
-		"--no-owner",      // skip restoration of object ownership in plain-text format
-		"--clean",         // clean (drop) database objects before recreating
-		"--compress", "6", // compression level for compressed formats
+		"openGauss",    // the database of which the table belongs
+		"-U", username, // the username gs_dump used to connect
+		"-W", password, // the password. CAUSION: password is set in initdb.sql
+		"--no-owner",
+		"--clean", // clean (drop) database objects before recreating
 	}
 
 	if d.Table != "" {
 		opts = append(opts, []string{"--table", d.Table}...)
 	}
-
-	opts = append(opts, connstr)
 
 	cmd := exec.Command("gs_dump", opts...)
 	cmd.Stdout = writer
@@ -55,6 +62,16 @@ func (d *Dump) Export(connstr string, writer io.Writer) error {
 		return fmt.Errorf("error: %s. output: %s", err.Error(), errOutput.Bytes())
 	}
 	return nil
+}
+
+func parse_user_info(input string) (string, string, error) {
+	reg := regexp.MustCompile(`(\w+)://(\w+):(\w+)`)
+	match := reg.FindStringSubmatch(input)
+	if len(match) < 4 {
+		return "", "", errors.New("can not parse user name and password")
+	}
+
+	return match[2], match[3], nil
 }
 
 // removeUnsupportedOptions removes any options unsupported for making a db dump

@@ -1,22 +1,45 @@
-var editor              = null;
-var connected           = false;
-var bookmarks           = {};
-var default_rows_limit  = 100;
-var currentObject       = null;
+var editor = null;
+var connected = false;
+var bookmarks = {};
+var default_rows_limit = 100;
+var currentObject = null;
 var autocompleteObjects = [];
 
 var filterOptions = {
-  "equal":      "= 'DATA'",
-  "not_equal":  "!= 'DATA'",
-  "greater":    "> 'DATA'" ,
-  "greater_eq": ">= 'DATA'",
-  "less":       "< 'DATA'",
-  "less_eq":    "<= 'DATA'",
-  "like":       "LIKE 'DATA'",
-  "ilike":      "ILIKE 'DATA'",
-  "null":       "IS NULL",
-  "not_null":   "IS NOT NULL"
+  equal: "= 'DATA'",
+  not_equal: "!= 'DATA'",
+  greater: "> 'DATA'",
+  greater_eq: ">= 'DATA'",
+  less: "< 'DATA'",
+  less_eq: "<= 'DATA'",
+  like: "LIKE 'DATA'",
+  ilike: "ILIKE 'DATA'",
+  null: "IS NULL",
+  not_null: "IS NOT NULL",
 };
+
+class OperateAction {
+  static SHOW_QUERY_HISTORY = new OperateAction("操作历史为空");
+  static SHOW_TABLE_INDEX = new OperateAction("无索引");
+  static SHOW_TABLE_CONSTRAINTS = new OperateAction("无约束");
+  static SHOW_TABLE_CONTENT = new OperateAction("无数据");
+  static SHOW_TABLE_STRUCTURE = new OperateAction("表结构为空");
+  static SHOW_CONNECTION_PANEL = new OperateAction("show connection panel");
+  static SHOW_ACTIVITY_PANEL = new OperateAction("会话为空");
+  static EXECUTE_QUERY = new OperateAction("执行成功");
+  static EXECUTE_EXPLAIN = new OperateAction("execute explain");
+  static EXECUTE_ANALYZE = new OperateAction("execute analyze");
+  static SHOW_UNIQ_COLUMN_VALUES = new OperateAction("show uniq column values");
+  static SHOW_FILED_NUM_STATS = new OperateAction("show field num stats");
+
+  constructor(empty_message) {
+    this.empty_message = empty_message;
+  }
+
+  toString() {
+    return this.empty_message;
+  }
+}
 
 function getSessionId() {
   var id = sessionStorage.getItem("session_id");
@@ -38,7 +61,7 @@ function getRowsLimit() {
 }
 
 function getPaginationOffset() {
-  var page  = $(".current-page").data("page");
+  var page = $(".current-page").data("page");
   var limit = getRowsLimit();
   return (page - 1) * limit;
 }
@@ -47,7 +70,7 @@ function getPagesCount(rowsCount) {
   var limit = getRowsLimit();
   var num = parseInt(rowsCount / limit);
 
-  if ((num * limit) < rowsCount) {
+  if (num * limit < rowsCount) {
     num++;
   }
 
@@ -64,75 +87,126 @@ function apiCall(method, path, params, cb) {
     cache: false,
     data: params,
     headers: {
-      "x-session-id": getSessionId()
+      "x-session-id": getSessionId(),
     },
-    success: function(data) {
+    success: function (data) {
       cb(data);
     },
-    error: function(xhr, status, data) {
+    error: function (xhr, status, data) {
       if (status == "timeout") {
-        return cb({ error: "Query timeout after " + (timeout / 1000) + "s" });
+        return cb({ error: "执行超时： " + timeout / 1000 + "s" });
+      } else if (status == "error" && xhr.status == 400) {
+        return cb(jQuery.parseJSON(xhr.responseText))
       }
-
-      cb(jQuery.parseJSON(xhr.responseText));
-    }
+      cb({ error: "抱歉，发生未知异常！" });
+    },
   });
 }
 
-function getInfo(cb)                        { apiCall("get", "/info", {}, cb); }
-function getObjects(cb)                     { apiCall("get", "/objects", {}, cb); }
-function getTables(cb)                      { apiCall("get", "/tables", {}, cb); }
-function getTableRows(table, opts, cb)      { apiCall("get", "/tables/" + table + "/rows", opts, cb); }
-function getTableStructure(table, opts, cb) { apiCall("get", "/tables/" + table, opts, cb); }
-function getTableIndexes(table, cb)         { apiCall("get", "/tables/" + table + "/indexes", {}, cb); }
-function getTableConstraints(table, cb)     { apiCall("get", "/tables/" + table + "/constraints", {}, cb); }
-function getHistory(cb)                     { apiCall("get", "/history", {}, cb); }
-function getBookmarks(cb)                   { apiCall("get", "/bookmarks", {}, cb); }
-function executeQuery(query, cb)            { apiCall("post", "/query", { query: query }, cb); }
-function explainQuery(query, cb)            { apiCall("post", "/explain", { query: query }, cb); }
-function analyzeQuery(query, cb)            { apiCall("post", "/analyze", { query: query }, cb); }
-function disconnect(cb)                     { apiCall("post", "/disconnect", {}, cb); }
+function getInfo(cb) {
+  apiCall("get", "/info", {}, cb);
+}
+function getObjects(cb) {
+  apiCall("get", "/objects", {}, cb);
+}
+function getTables(cb) {
+  apiCall("get", "/tables", {}, cb);
+}
+function getTableRows(table, opts, cb) {
+  apiCall("get", "/tables/" + table + "/rows", opts, cb);
+}
+function getTableStructure(table, opts, cb) {
+  apiCall("get", "/tables/" + table, opts, cb);
+}
+function getTableIndexes(table, cb) {
+  apiCall("get", "/tables/" + table + "/indexes", {}, cb);
+}
+function getTableConstraints(table, cb) {
+  apiCall("get", "/tables/" + table + "/constraints", {}, cb);
+}
+function getHistory(cb) {
+  apiCall("get", "/history", {}, cb);
+}
+function getBookmarks(cb) {
+  apiCall("get", "/bookmarks", {}, cb);
+}
+function executeQuery(query, cb) {
+  apiCall("post", "/query", { query: query }, cb);
+}
+function explainQuery(query, cb) {
+  apiCall("post", "/explain", { query: query }, cb);
+}
+function analyzeQuery(query, cb) {
+  apiCall("post", "/analyze", { query: query }, cb);
+}
+function disconnect(cb) {
+  apiCall("post", "/disconnect", {}, cb);
+}
 
 function encodeQuery(query) {
-  return Base64.encode(query).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, ".");
+  return Base64.encode(query)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, ".");
 }
 
 function buildSchemaSection(name, objects) {
   var section = "";
 
   var titles = {
-    "table":             "Tables",
-    "view":              "Views",
-    "materialized_view": "Materialized Views",
-    "sequence":          "Sequences"
+    table: "Tables",
+    view: "Views",
+    materialized_view: "Materialized Views",
+    sequence: "Sequences",
   };
 
   var icons = {
-    "table":             '<i class="fa fa-table"></i>',
-    "view":              '<i class="fa fa-table"></i>',
-    "materialized_view": '<i class="fa fa-table"></i>',
-    "sequence":          '<i class="fa fa-circle-o"></i>'
+    table: '<i class="fa fa-table"></i>',
+    view: '<i class="fa fa-table"></i>',
+    materialized_view: '<i class="fa fa-table"></i>',
+    sequence: '<i class="fa fa-circle-o"></i>',
   };
 
   var klass = "";
   if (name == "public") klass = "expanded";
 
   section += "<div class='schema " + klass + "'>";
-  section += "<div class='schema-name'><i class='fa fa-folder-o'></i><i class='fa fa-folder-open-o'></i> " + name + "</div>";
+  section +=
+    "<div class='schema-name'><i class='fa fa-folder-o'></i><i class='fa fa-folder-open-o'></i> " +
+    name +
+    "</div>";
   section += "<div class='schema-container'>";
 
-  ["table", "view", "materialized_view", "sequence"].forEach(function(group) {
+  ["table", "view", "materialized_view", "sequence"].forEach(function (group) {
     group_klass = "";
     if (name == "public" && group == "table") group_klass = "expanded";
 
     section += "<div class='schema-group " + group_klass + "'>";
-    section += "<div class='schema-group-title'><i class='fa fa-chevron-right'></i><i class='fa fa-chevron-down'></i> " + titles[group] + " <span class='schema-group-count'>" + objects[group].length + "</span></div>";
+    section +=
+      "<div class='schema-group-title'><i class='fa fa-chevron-right'></i><i class='fa fa-chevron-down'></i> " +
+      titles[group] +
+      " <span class='schema-group-count'>" +
+      objects[group].length +
+      "</span></div>";
     section += "<ul data-group='" + group + "'>";
 
     if (objects[group]) {
-      objects[group].forEach(function(item) {
+      objects[group].forEach(function (item) {
         var id = name + "." + item;
-        section += "<li class='schema-item schema-" + group + "' data-type='" + group + "' data-id='" + id + "' data-name='" + item + "'>" + icons[group] + "&nbsp;" + item + "</li>";
+        section +=
+          "<li class='schema-item schema-" +
+          group +
+          "' data-type='" +
+          group +
+          "' data-id='" +
+          id +
+          "' data-name='" +
+          item +
+          "'>" +
+          icons[group] +
+          "&nbsp;" +
+          item +
+          "</li>";
       });
       section += "</ul></div>";
     }
@@ -146,13 +220,13 @@ function buildSchemaSection(name, objects) {
 function loadSchemas() {
   $("#objects").html("");
 
-  getObjects(function(data) {
+  getObjects(function (data) {
     if (Object.keys(data).length == 0) {
       data["public"] = {
         table: [],
         view: [],
         materialized_view: [],
-        sequence: []
+        sequence: [],
       };
     }
 
@@ -168,14 +242,16 @@ function loadSchemas() {
     autocompleteObjects = [];
     for (schema in data) {
       for (kind in data[schema]) {
-        if (!(kind == "table" || kind == "view" || kind == "materialized_view")) {
-          continue
+        if (
+          !(kind == "table" || kind == "view" || kind == "materialized_view")
+        ) {
+          continue;
         }
         for (item in data[schema][kind]) {
           autocompleteObjects.push({
             caption: data[schema][kind][item],
             value: data[schema][kind][item],
-            meta: kind
+            meta: kind,
           });
         }
       }
@@ -193,7 +269,7 @@ function escapeHtml(str) {
   return "<span class='null'>null</span>";
 }
 
-function unescapeHtml(str){
+function unescapeHtml(str) {
   var e = document.createElement("div");
   e.innerHTML = str;
   return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
@@ -204,10 +280,7 @@ function getCurrentObject() {
 }
 
 function resetTable() {
-  $("#results").
-    data("mode", "").
-    removeClass("empty").
-    removeClass("no-crop");
+  $("#results").data("mode", "").removeClass("empty").removeClass("no-crop");
 
   $("#results_header").html("");
   $("#results_body").html("");
@@ -215,19 +288,21 @@ function resetTable() {
 
 function performTableAction(table, action, el) {
   if (action == "truncate" || action == "delete") {
-    var message = "Are you sure you want to " + action + " table " + table + " ?";
+    var message = "确认要";
+    message += action == "truncate" ? "清空" : "删除";
+    message += "表 " + table + " ?";
     if (!confirm(message)) return;
   }
 
-  switch(action) {
+  switch (action) {
     case "truncate":
-      executeQuery("TRUNCATE TABLE " + table, function(data) {
+      executeQuery("TRUNCATE TABLE " + table, function (data) {
         if (data.error) alert(data.error);
         resetTable();
       });
       break;
     case "delete":
-      executeQuery("DROP TABLE " + table, function(data) {
+      executeQuery("DROP TABLE " + table, function (data) {
         if (data.error) alert(data.error);
         loadSchemas();
         resetTable();
@@ -238,30 +313,44 @@ function performTableAction(table, action, el) {
       var db = $("#current_database").text();
       var filename = db + "." + table + "." + format;
       var query = window.encodeURI("SELECT * FROM " + table);
-      var url = window.location.href.split("#")[0] + "api/query?format=" + format + "&filename=" + filename + "&query=" + query + "&_session_id=" + getSessionId();
-      var win  = window.open(url, "_blank");
+      var url =
+        window.location.href.split("#")[0] +
+        "api/query?format=" +
+        format +
+        "&filename=" +
+        filename +
+        "&query=" +
+        query +
+        "&_session_id=" +
+        getSessionId();
+      var win = window.open(url, "_blank");
       win.focus();
       break;
     case "dump":
-      var url = window.location.href.split("#")[0] + "api/export?table=" + table + "&_session_id=" + getSessionId();
-      var win  = window.open(url, "_blank");
+      var url =
+        window.location.href.split("#")[0] +
+        "api/export?table=" +
+        table +
+        "&_session_id=" +
+        getSessionId();
+      var win = window.open(url, "_blank");
       win.focus();
       break;
     case "copy":
-      copyToClipboard(table.split('.')[1]);
+      copyToClipboard(table.split(".")[1]);
       break;
   }
 }
 
 function performViewAction(view, action, el) {
   if (action == "delete") {
-    var message = "Are you sure you want to " + action + " view " + view + " ?";
+    var message = "确认要删除视图 " + view + " ?";
     if (!confirm(message)) return;
   }
 
-  switch(action) {
+  switch (action) {
     case "delete":
-      executeQuery("DROP VIEW " + view, function(data) {
+      executeQuery("DROP VIEW " + view, function (data) {
         if (data.error) alert(data.error);
         loadSchemas();
         resetTable();
@@ -272,20 +361,29 @@ function performViewAction(view, action, el) {
       var db = $("#current_database").text();
       var filename = db + "." + view + "." + format;
       var query = window.encodeURI("SELECT * FROM " + view);
-      var url = window.location.href.split("#")[0] + "api/query?format=" + format + "&filename=" + filename + "&query=" + query + "&_session_id=" + getSessionId();
-      var win  = window.open(url, "_blank");
+      var url =
+        window.location.href.split("#")[0] +
+        "api/query?format=" +
+        format +
+        "&filename=" +
+        filename +
+        "&query=" +
+        query +
+        "&_session_id=" +
+        getSessionId();
+      var win = window.open(url, "_blank");
       win.focus();
       break;
     case "copy":
-      copyToClipboard(view.split('.')[1]);
+      copyToClipboard(view.split(".")[1]);
       break;
   }
 }
 
 function performRowAction(action, value) {
   if (action == "stop_query") {
-    if (!confirm("Are you sure you want to stop the query?")) return;
-    executeQuery("SELECT pg_cancel_backend(" + value + ");", function(data) {
+    if (!confirm("确认终止查询?")) return;
+    executeQuery("SELECT pg_cancel_backend(" + value + ");", function (data) {
       if (data.error) alert(data.error);
       setTimeout(showActivityPanel, 1000);
     });
@@ -303,10 +401,7 @@ function sortArrow(direction) {
   }
 }
 
-function buildTable(results, sortColumn, sortOrder, options) {
-  if (!options) options = {};
-  var action = options.action;
-
+function buildTable(results, action, sortColumn, sortOrder) {
   resetTable();
 
   if (results.error) {
@@ -315,9 +410,13 @@ function buildTable(results, sortColumn, sortOrder, options) {
     return;
   }
 
+  var show_message = action.toString();
   if (results.rows.length == 0) {
+    if (action == OperateAction.EXECUTE_QUERY && results.action == "select") {
+      show_message = OperateAction.SHOW_TABLE_CONTENT.empty_message;
+    }
     $("#results_header").html("");
-    $("#results_body").html("<tr><td>No records found</td></tr>");
+    $("#results_body").html("<tr><td>" + show_message + "</td></tr>");
     $("#result-rows-count").html("");
     $("#results").addClass("empty");
     return;
@@ -325,35 +424,55 @@ function buildTable(results, sortColumn, sortOrder, options) {
 
   var cols = "";
   var rows = "";
+  var stopColumn;
 
-  results.columns.forEach(function(col) {
+  results.columns.forEach(function (col) {
     if (col === sortColumn) {
-      cols += "<th class='table-header-col active' data-name='" + col + "'" + "data-order=" + sortOrder + ">" + col + "&nbsp;" + sortArrow(sortOrder) + "</th>";
-    }
-    else {
-      cols += "<th class='table-header-col' data-name='" + col + "'>" + col + "</th>";
+      cols +=
+        "<th class='table-header-col active' data-name='" +
+        col +
+        "'" +
+        "data-order=" +
+        sortOrder +
+        ">" +
+        col +
+        "&nbsp;" +
+        sortArrow(sortOrder) +
+        "</th>";
+    } else {
+      cols +=
+        "<th class='table-header-col' data-name='" + col + "'>" + col + "</th>";
     }
   });
 
   // No header to make the column non-sortable
-  if (action) {
+  if (action == OperateAction.SHOW_ACTIVITY_PANEL) {
     cols += "<th></th>";
-
     // Determine which column contains the data attribute
-    action.dataColumn = results.columns.indexOf(action.data);
+    stopColumn = results.columns.indexOf('pid');
   }
 
-  results.rows.forEach(function(row) {
+  results.rows.forEach(function (row) {
     var r = "";
 
     // Add all actual row data here
     for (i in row) {
-      r += "<td data-col='" + i + "'><div>" + escapeHtml(row[i]) + "</div></td>";
+      r +=
+        "<td data-col='" + i + "'><div>" + escapeHtml(row[i]) + "</div></td>";
     }
 
-    // Add row action button
-    if (action) {
-      r += "<td><a class='btn btn-xs btn-" + action.style + " row-action' data-action='" + action.name + "' data-value='" + row[action.dataColumn] + "' href='#'>" + action.title + "</a></td>";
+    // Add row action button.
+    if (action == OperateAction.SHOW_ACTIVITY_PANEL) {
+      r +=
+        "<td><a class='btn btn-xs btn-" +
+        "danger" +
+        " row-action' data-action='" +
+        "stop_query" +
+        "' data-value='" +
+        row[stopColumn] +
+        "' href='#'>" +
+        "终止" +
+        "</a></td>";
     }
 
     rows += "<tr>" + r + "</tr>";
@@ -362,8 +481,8 @@ function buildTable(results, sortColumn, sortOrder, options) {
   $("#results_header").html(cols);
   $("#results_body").html(rows);
 
-  // Show number of rows rendered on the page
-  $("#result-rows-count").html(results.rows.length + " rows");
+  // Show number of rows rendered on the page.
+  //$("#result-rows-count").html(results.rows.length + " rows");
 }
 
 function setCurrentTab(id) {
@@ -380,14 +499,17 @@ function setCurrentTab(id) {
 }
 
 function showQueryHistory() {
-  getHistory(function(data) {
+  getHistory(function (data) {
     var rows = [];
 
-    for(i in data) {
+    for (i in data) {
       rows.unshift([parseInt(i) + 1, data[i].query, data[i].timestamp]);
     }
 
-    buildTable({ columns: ["id", "query", "timestamp"], rows: rows });
+    buildTable(
+      { columns: ["id", "query", "timestamp"], rows: rows },
+      OperateAction.SHOW_QUERY_HISTORY
+    );
 
     setCurrentTab("table_history");
     $("#input").hide();
@@ -400,13 +522,13 @@ function showTableIndexes() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
-  getTableIndexes(name, function(data) {
+  getTableIndexes(name, function (data) {
     setCurrentTab("table_indexes");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_TABLE_INDEX);
 
     $("#input").hide();
     $("#body").prop("class", "full");
@@ -418,13 +540,13 @@ function showTableConstraints() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
-  getTableConstraints(name, function(data) {
+  getTableConstraints(name, function (data) {
     setCurrentTab("table_constraints");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_TABLE_CONSTRAINTS);
 
     $("#input").hide();
     $("#body").prop("class", "full");
@@ -436,11 +558,11 @@ function showTableInfo() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
-  apiCall("get", "/tables/" + name + "/info", {}, function(data) {
+  apiCall("get", "/tables/" + name + "/info", {}, function (data) {
     $(".table-information .lines").show();
     $("#table_total_size").text(data.total_size);
     $("#table_data_size").text(data.data_size);
@@ -460,21 +582,19 @@ function updatePaginator(pagination) {
     return;
   }
 
-  $(".current-page").
-    data("page", pagination.page).
-    data("pages", pagination.pages_count);
+  $(".current-page")
+    .data("page", pagination.page)
+    .data("pages", pagination.pages_count);
 
   if (pagination.page > 1) {
     $(".prev-page").prop("disabled", "");
-  }
-  else {
+  } else {
     $(".prev-page").prop("disabled", "disabled");
   }
 
   if (pagination.pages_count > 1 && pagination.page < pagination.pages_count) {
     $(".next-page").prop("disabled", "");
-  }
-  else {
+  } else {
     $(".next-page").prop("disabled", "disabled");
   }
 
@@ -487,38 +607,38 @@ function showTableContent(sortColumn, sortOrder) {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
   var opts = {
-    limit:       getRowsLimit(),
-    offset:      getPaginationOffset(),
+    limit: getRowsLimit(),
+    offset: getPaginationOffset(),
     sort_column: sortColumn,
-    sort_order:  sortOrder
+    sort_order: sortOrder,
   };
 
   var filter = {
     column: $(".filters select.column").val(),
-    op:     $(".filters select.filter").val(),
-    input:  $(".filters input").val()
+    op: $(".filters select.filter").val(),
+    input: $(".filters input").val(),
   };
 
   // Apply filtering only if column is selected
   if (filter.column && filter.op) {
     var where = [
       '"' + filter.column + '"',
-      filterOptions[filter.op].replace("DATA", filter.input)
+      filterOptions[filter.op].replace("DATA", filter.input),
     ].join(" ");
 
     opts["where"] = where;
   }
 
-  getTableRows(name, opts, function(data) {
+  getTableRows(name, opts, function (data) {
     $("#input").hide();
     $("#body").prop("class", "with-pagination");
 
-    buildTable(data, sortColumn, sortOrder);
+    buildTable(data, OperateAction.SHOW_TABLE_CONTENT, sortColumn, sortOrder);
     setCurrentTab("table_content");
     updatePaginator(data.pagination);
 
@@ -543,7 +663,7 @@ function showTableStructure() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("Please select a table!");
+    alert("请选择表后再进行操作!");
     return;
   }
 
@@ -552,8 +672,8 @@ function showTableStructure() {
   $("#input").hide();
   $("#body").prop("class", "full");
 
-  getTableStructure(name, { type: getCurrentObject().type }, function(data) {
-    buildTable(data);
+  getTableStructure(name, { type: getCurrentObject().type }, function (data) {
+    buildTable(data, OperateAction.SHOW_TABLE_STRUCTURE);
     $("#results").addClass("no-crop");
   });
 }
@@ -567,23 +687,23 @@ function showQueryPanel() {
   editor.focus();
 
   $("#input").show();
-  $("#body").prop("class", "")
+  $("#body").prop("class", "");
 }
 
 function showConnectionPanel() {
   setCurrentTab("table_connection");
 
-  apiCall("get", "/connection", {}, function(data) {
+  apiCall("get", "/connection", {}, function (data) {
     var rows = [];
 
-    for(key in data) {
+    for (key in data) {
       rows.push([key, data[key]]);
     }
 
-    buildTable({
-      columns: ["attribute", "value"],
-      rows: rows
-    });
+    buildTable(
+      { columns: ["attribute", "value"], rows: rows },
+      OperateAction.SHOW_CONNECTION_PANEL
+    );
 
     $("#input").hide();
     $("#body").addClass("full");
@@ -601,8 +721,8 @@ function showActivityPanel() {
   }
 
   setCurrentTab("table_activity");
-  apiCall("get", "/activity", {}, function(data) {
-    buildTable(data, null, null, options);
+  apiCall("get", "/activity", {}, function (data) {
+    buildTable(data, OperateAction.SHOW_ACTIVITY_PANEL);
     $("#input").hide();
     $("#body").addClass("full");
   });
@@ -615,7 +735,10 @@ function showQueryProgressMessage() {
 }
 
 function hideQueryProgressMessage() {
-  $("#run, #explain-dropdown-toggle, #csv, #json, #xml").prop("disabled", false);
+  $("#run, #explain-dropdown-toggle, #csv, #json, #xml").prop(
+    "disabled",
+    false
+  );
   $("#query_progress").hide();
 }
 
@@ -638,7 +761,7 @@ function getEditorSelection() {
         editor.selection.setSelectionRange({
           start: { row: subquery.startRow, column: 0 },
           end: { row: subquery.endRow, column: 0 },
-        })
+        });
       }
 
       return subquery.text;
@@ -680,7 +803,7 @@ function getSubquery(text, cursor) {
       text: lines.slice(ranges[0][0], ranges[0][1]).join("\n"),
       startRow: ranges[0][0],
       endRow: ranges[0][1],
-      numChunks: numChunks
+      numChunks: numChunks,
     };
   }
 }
@@ -695,8 +818,8 @@ function runQuery() {
     return;
   }
 
-  executeQuery(query, function(data) {
-    buildTable(data);
+  executeQuery(query, function (data) {
+    buildTable(data, OperateAction.EXECUTE_QUERY);
 
     hideQueryProgressMessage();
     $("#input").show();
@@ -724,8 +847,8 @@ function runExplain() {
     return;
   }
 
-  explainQuery(query, function(data) {
-    buildTable(data);
+  explainQuery(query, function (data) {
+    buildTable(data, OperateAction.EXECUTE_EXPLAIN);
 
     hideQueryProgressMessage();
     $("#input").show();
@@ -744,8 +867,8 @@ function runAnalyze() {
     return;
   }
 
-  analyzeQuery(query, function(data) {
-    buildTable(data);
+  analyzeQuery(query, function (data) {
+    buildTable(data, OperateAction.EXECUTE_ANALYZE);
 
     hideQueryProgressMessage();
     $("#input").show();
@@ -760,8 +883,15 @@ function exportTo(format) {
     return;
   }
 
-  var url = window.location.href.split("#")[0] + "api/query?format=" + format + "&query=" + encodeQuery(query) + "&_session_id=" + getSessionId();
-  var win = window.open(url, '_blank');
+  var url =
+    window.location.href.split("#")[0] +
+    "api/query?format=" +
+    format +
+    "&query=" +
+    encodeQuery(query) +
+    "&_session_id=" +
+    getSessionId();
+  var win = window.open(url, "_blank");
 
   setCurrentTab("table_query");
   win.focus();
@@ -774,39 +904,55 @@ function showUniqueColumnsValues(table, column, showCounts) {
   // Display results ordered by counts.
   // This could be slow on large sets without an index.
   if (showCounts) {
-    query = 'SELECT DISTINCT "' + column + '", COUNT(1) AS total_count FROM ' + table + ' GROUP BY "' + column + '" ORDER BY total_count DESC';
+    query =
+      'SELECT DISTINCT "' +
+      column +
+      '", COUNT(1) AS total_count FROM ' +
+      table +
+      ' GROUP BY "' +
+      column +
+      '" ORDER BY total_count DESC';
   }
 
-  executeQuery(query, function(data) {
+  executeQuery(query, function (data) {
     $("#input").hide();
     $("#body").prop("class", "full");
     $("#results").data("mode", "query");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_UNIQ_COLUMN_VALUES);
   });
 }
 
 // Show numeric stats on the field
 function showFieldNumStats(table, column) {
-  var query = 'SELECT count(1), min(' + column + '), max(' + column + '), avg(' + column + ') FROM ' + table;
+  var query =
+    "SELECT count(1), min(" +
+    column +
+    "), max(" +
+    column +
+    "), avg(" +
+    column +
+    ") FROM " +
+    table;
 
-  executeQuery(query, function(data) {
+  executeQuery(query, function (data) {
     $("#input").hide();
     $("#body").prop("class", "full");
     $("#results").data("mode", "query");
-    buildTable(data);
+    buildTable(data, OperateAction.SHOW_FILED_NUM_STATS);
   });
 }
 
 function buildTableFilters(name, type) {
-  getTableStructure(name, { type: type }, function(data) {
+  getTableStructure(name, { type: type }, function (data) {
     if (data.rows.length == 0) {
       $("#pagination .filters").hide();
-    }
-    else {
+    } else {
       $("#pagination .filters").show();
     }
 
-    $("#pagination select.column").html("<option value='' selected>Select column</option>");
+    $("#pagination select.column").html(
+      "<option value='' selected>选择列</option>"
+    );
 
     for (var i = 0; i < data.rows.length; i++) {
       var row = data.rows[i];
@@ -820,8 +966,8 @@ function buildTableFilters(name, type) {
 var objectAutocompleter = {
   getCompletions: function (editor, session, pos, prefix, callback) {
     callback(null, autocompleteObjects);
-  }
-}
+  },
+};
 
 function initEditor() {
   var writeQueryTimeout = null;
@@ -840,32 +986,35 @@ function initEditor() {
   editor.getSession().setTabSize(2);
   editor.getSession().setUseSoftTabs(true);
 
-  editor.commands.addCommands([{
-    name: "run_query",
-    bindKey: {
-      win: "Ctrl-Enter",
-      mac: "Command-Enter"
+  editor.commands.addCommands([
+    {
+      name: "run_query",
+      bindKey: {
+        win: "Ctrl-Enter",
+        mac: "Command-Enter",
+      },
+      exec: function (editor) {
+        runQuery();
+      },
     },
-    exec: function(editor) {
-      runQuery();
-    }
-  }, {
-    name: "explain_query",
-    bindKey: {
-      win: "Ctrl-E",
-      mac: "Command-E"
+    {
+      name: "explain_query",
+      bindKey: {
+        win: "Ctrl-E",
+        mac: "Command-E",
+      },
+      exec: function (editor) {
+        runExplain();
+      },
     },
-    exec: function(editor) {
-      runExplain();
-    }
-  }]);
+  ]);
 
-  editor.on("change", function() {
+  editor.on("change", function () {
     if (writeQueryTimeout) {
       clearTimeout(writeQueryTimeout);
     }
 
-    writeQueryTimeout = setTimeout(function() {
+    writeQueryTimeout = setTimeout(function () {
       localStorage.setItem("pgweb_query", editor.getValue());
     }, 1000);
   });
@@ -881,8 +1030,7 @@ function addShortcutTooltips() {
   if (navigator.userAgent.indexOf("OS X") > 0) {
     $("#run").attr("title", "Shortcut: ⌘+Enter");
     $("#explain").attr("title", "Shortcut: ⌘+E");
-  }
-  else {
+  } else {
     $("#run").attr("title", "Shortcut: Ctrl+Enter");
     $("#explain").attr("title", "Shortcut: Ctrl+E");
   }
@@ -891,26 +1039,35 @@ function addShortcutTooltips() {
 // Get the latest release from Github API
 function getLatestReleaseInfo(current) {
   try {
-    $.get("https://api.github.com/repos/sosedoff/pgweb/releases/latest", function(release) {
-      if (release.name != current.version) {
-        var message = "Update available. Check out " + release.tag_name + " on <a target='_blank' href='" + release.html_url + "'>Github</a>";
-        $(".connection-settings .update").html(message).fadeIn();
+    $.get(
+      "https://api.gitee.com/openGauss/openGauss-webclient/releases/latest",
+      function (release) {
+        if (release.name != current.version) {
+          var message =
+            "Update available. Check out " +
+            release.tag_name +
+            " on <a target='_blank' href='" +
+            release.html_url +
+            "'>Gitee</a>";
+          $(".connection-settings .update").html(message).fadeIn();
+        }
       }
-    });
-  }
-  catch(error) {
-    console.log("Cant get last release from github:", error);
+    );
+  } catch (error) {
+    console.log("Cant get last release from gitee:", error);
   }
 }
 
 function showConnectionSettings() {
   // Fetch server info
-  getInfo(function(data) {
+  getInfo(function (data) {
     if (data.error) return;
     if (!data.version) return;
 
     // Show the current postgres version
-    $(".connection-settings .version").text("v" + data.version).show();
+    $(".connection-settings .version")
+      .text("v" + data.version)
+      .show();
 
     // Check for updates if running the actual release from Github
     if (data.git_sha == "") {
@@ -918,7 +1075,7 @@ function showConnectionSettings() {
     }
   });
 
-  getBookmarks(function(data) {
+  getBookmarks(function (data) {
     // Do not add any bookmarks if we've got an error
     if (data.error) {
       return;
@@ -936,12 +1093,13 @@ function showConnectionSettings() {
 
       // Add all available bookmarks
       for (key in data) {
-        $("<option value='" + key + "''>" + key + "</option>").appendTo("#connection_bookmarks");
+        $("<option value='" + key + "''>" + key + "</option>").appendTo(
+          "#connection_bookmarks"
+        );
       }
 
       $(".bookmarks").show();
-    }
-    else {
+    } else {
       $(".bookmarks").hide();
     }
   });
@@ -950,25 +1108,37 @@ function showConnectionSettings() {
 }
 
 function getConnectionString() {
-  var url  = $.trim($("#connection_url").val());
+  var url = $.trim($("#connection_url").val());
   var mode = $(".connection-group-switch button.active").attr("data");
-  var ssl  = $("#connection_ssl").val();
+  var ssl = $("#connection_ssl").val();
 
   if (mode == "standard" || mode == "ssh") {
     var host = $("#pg_host").val();
     var port = $("#pg_port").val();
     var user = $("#pg_user").val();
     var pass = encodeURIComponent($("#pg_password").val());
-    var db   = $("#pg_db").val();
+    var db = $("#pg_db").val();
 
     if (port.length == 0) {
       port = "5432";
     }
 
-    url = "postgres://" + user + ":" + pass + "@" + host + ":" + port + "/" + db + "?sslmode=" + ssl;
-  }
-  else {
-    var local = url.indexOf("localhost") != -1 || url.indexOf("127.0.0.1") != -1;
+    url =
+      "postgres://" +
+      user +
+      ":" +
+      pass +
+      "@" +
+      host +
+      ":" +
+      port +
+      "/" +
+      db +
+      "?sslmode=" +
+      ssl;
+  } else {
+    var local =
+      url.indexOf("localhost") != -1 || url.indexOf("127.0.0.1") != -1;
 
     if (local && url.indexOf("sslmode") == -1) {
       url += "?sslmode=" + ssl;
@@ -983,7 +1153,7 @@ function bindTableHeaderMenu() {
   $("#results_header").contextmenu({
     scopes: "th",
     target: "#results_header_menu",
-    before: function(e, element, target) {
+    before: function (e, element, target) {
       // Enable menu for browsing table rows view only.
       if ($("#results").data("mode") != "browse") {
         e.preventDefault();
@@ -991,10 +1161,10 @@ function bindTableHeaderMenu() {
         return false;
       }
     },
-    onItem: function(context, e) {
+    onItem: function (context, e) {
       var menuItem = $(e.target);
 
-      switch(menuItem.data("action")) {
+      switch (menuItem.data("action")) {
         case "copy_name":
           copyToClipboard($(context).data("name"));
           break;
@@ -1002,28 +1172,28 @@ function bindTableHeaderMenu() {
         case "unique_values":
           showUniqueColumnsValues(
             $("#results").data("table"), // table name
-            $(context).data("name"),     // column name
-            menuItem.data("counts")      // display counts
+            $(context).data("name"), // column name
+            menuItem.data("counts") // display counts
           );
           break;
 
         case "num_stats":
           showFieldNumStats(
             $("#results").data("table"), // table name
-            $(context).data("name")      // column name
+            $(context).data("name") // column name
           );
           break;
       }
-    }
+    },
   });
 
   $("#results_body").contextmenu({
     scopes: "td",
     target: "#results_row_menu",
-    before: function(e, element, target) {
+    before: function (e, element, target) {
       var browseMode = $("#results").data("mode");
-      var isEmpty    = $("#results").hasClass("empty");
-      var isAllowed  = browseMode == "browse" || browseMode == "query";
+      var isEmpty = $("#results").hasClass("empty");
+      var isAllowed = browseMode == "browse" || browseMode == "query";
 
       if (isEmpty || !isAllowed) {
         e.preventDefault();
@@ -1031,41 +1201,44 @@ function bindTableHeaderMenu() {
         return false;
       }
     },
-    onItem: function(context, e) {
+    onItem: function (context, e) {
       var menuItem = $(e.target);
 
-      switch(menuItem.data("action")) {
+      switch (menuItem.data("action")) {
         case "copy_value":
           copyToClipboard($(context).text());
           break;
         case "filter_by_value":
-          var colIdx   = $(context).data("col");
+          var colIdx = $(context).data("col");
           var colValue = $(context).text();
-          var colName  = $("#results_header th").eq(colIdx).data("name");
+          var colName = $("#results_header th").eq(colIdx).data("name");
 
           $("select.column").val(colName);
           $("select.filter").val("equal");
           $("#table_filter_value").val(colValue);
           $("#rows_filter").submit();
       }
-    }
+    },
   });
 }
 
 function bindCurrentDatabaseMenu() {
   $("#current_database").contextmenu({
     target: "#current_database_context_menu",
-    onItem: function(context, e) {
+    onItem: function (context, e) {
       var menuItem = $(e.target);
 
-      switch(menuItem.data("action")) {
+      switch (menuItem.data("action")) {
         case "export":
-          var url = window.location.href.split("#")[0] + "api/export?_session_id=" + getSessionId();
-          var win  = window.open(url, "_blank");
+          var url =
+            window.location.href.split("#")[0] +
+            "api/export?_session_id=" +
+            getSessionId();
+          var win = window.open(url, "_blank");
           win.focus();
           break;
       }
-    }
+    },
   });
 }
 
@@ -1087,11 +1260,11 @@ function bindDatabaseObjectsFilter() {
     $(".schema-group").addClass("expanded");
 
     filterTimeout = setTimeout(function () {
-      filterObjectsByName(val)
+      filterObjectsByName(val);
     }, 200);
   });
 
-  $(".clear-objects-filter").on("click", function(e) {
+  $(".clear-objects-filter").on("click", function (e) {
     resetObjectsFilter();
   });
 }
@@ -1118,7 +1291,13 @@ function filterObjectsByName(query) {
 function getQuotedSchemaTableName(table) {
   if (typeof table === "string" && table.indexOf(".") > -1) {
     var schemaTableComponents = table.split(".");
-    return ['"', schemaTableComponents[0], '"."', schemaTableComponents[1], '"'].join('');
+    return [
+      '"',
+      schemaTableComponents[0],
+      '"."',
+      schemaTableComponents[1],
+      '"',
+    ].join("");
   }
   return table;
 }
@@ -1127,19 +1306,19 @@ function bindContextMenus() {
   bindTableHeaderMenu();
   bindCurrentDatabaseMenu();
 
-  $(".schema-group ul").each(function(id, el) {
+  $(".schema-group ul").each(function (id, el) {
     var group = $(el).data("group");
 
     if (group == "table") {
       $(el).contextmenu({
         target: "#tables_context_menu",
         scopes: "li.schema-table",
-        onItem: function(context, e) {
-          var el      = $(e.target);
-          var table   = getQuotedSchemaTableName($(context[0]).data("id"));
-          var action  = el.data("action");
+        onItem: function (context, e) {
+          var el = $(e.target);
+          var table = getQuotedSchemaTableName($(context[0]).data("id"));
+          var action = el.data("action");
           performTableAction(table, action, el);
-        }
+        },
       });
     }
 
@@ -1147,12 +1326,12 @@ function bindContextMenus() {
       $(el).contextmenu({
         target: "#view_context_menu",
         scopes: "li.schema-view",
-        onItem: function(context, e) {
-          var el      = $(e.target);
-          var table   = getQuotedSchemaTableName($(context[0]).data("id"));
-          var action  = el.data("action");
+        onItem: function (context, e) {
+          var el = $(e.target);
+          var table = getQuotedSchemaTableName($(context[0]).data("id"));
+          var action = el.data("action");
           performViewAction(table, action, el);
-        }
+        },
       });
     }
   });
@@ -1173,7 +1352,7 @@ function enableDatabaseSearch(data) {
     minLength: 0,
     items: "all",
     autoSelect: false,
-    fitToElement: true
+    fitToElement: true,
   });
 
   input.typeahead("lookup").focus();
@@ -1194,47 +1373,47 @@ $(document).ready(function() {
   $("#table_connection").on("click",  function() { showConnectionPanel();  });
   $("#table_activity").on("click",    function() { showActivityPanel();    });
 
-  $("#run").on("click", function() {
+  $("#run").on("click", function () {
     runQuery();
   });
 
-  $("#explain").on("click", function() {
+  $("#explain").on("click", function () {
     runExplain();
   });
 
-  $("#analyze").on("click", function() {
+  $("#analyze").on("click", function () {
     runAnalyze();
   });
 
-  $("#csv").on("click", function() {
+  $("#csv").on("click", function () {
     exportTo("csv");
   });
 
-  $("#json").on("click", function() {
+  $("#json").on("click", function () {
     exportTo("json");
   });
 
-  $("#xml").on("click", function() {
+  $("#xml").on("click", function () {
     exportTo("xml");
   });
 
-  $("#results").on("click", "tr", function(e) {
+  $("#results").on("click", "tr", function (e) {
     $("#results tr.selected").removeClass();
     $(this).addClass("selected");
   });
 
-  $("#objects").on("click", ".schema-group-title", function(e) {
+  $("#objects").on("click", ".schema-group-title", function (e) {
     $(this).parent().toggleClass("expanded");
   });
 
-  $("#objects").on("click", ".schema-name", function(e) {
+  $("#objects").on("click", ".schema-name", function (e) {
     $(this).parent().toggleClass("expanded");
   });
 
-  $("#objects").on("click", "li", function(e) {
+  $("#objects").on("click", "li", function (e) {
     currentObject = {
       name: $(this).data("id"),
-      type: $(this).data("type")
+      type: $(this).data("type"),
     };
 
     $("#objects li").removeClass("active");
@@ -1244,7 +1423,7 @@ $(document).ready(function() {
 
     showTableInfo();
 
-    switch(sessionStorage.getItem("tab")) {
+    switch (sessionStorage.getItem("tab")) {
       case "table_content":
         showTableContent();
         break;
@@ -1262,46 +1441,46 @@ $(document).ready(function() {
     }
   });
 
-  $("#results").on("click", "a.row-action", function(e) {
+  $("#results").on("click", "a.row-action", function (e) {
     e.preventDefault();
 
     var action = $(this).data("action");
-    var value  = $(this).data("value");
+    var value = $(this).data("value");
 
     performRowAction(action, value);
-  })
+  });
 
-  $("#results").on("click", "th", function(e) {
+  $("#results").on("click", "th", function (e) {
     if (!$("#table_content").hasClass("selected")) return;
 
     var sortColumn = $(this).data("name");
-    var sortOrder  = $(this).data("order") === "ASC" ? "DESC" : "ASC";
+    var sortOrder = $(this).data("order") === "ASC" ? "DESC" : "ASC";
 
     $(this).data("order", sortOrder);
     showTableContent(sortColumn, sortOrder);
   });
 
-  $("#refresh_tables").on("click", function() {
+  $("#refresh_tables").on("click", function () {
     loadSchemas();
   });
 
-  $("#rows_filter").on("submit", function(e) {
+  $("#rows_filter").on("submit", function (e) {
     e.preventDefault();
     $(".current-page").data("page", 1);
 
     var column = $(this).find("select.column").val();
     var filter = $(this).find("select.filter").val();
-    var query  = $.trim($(this).find("input").val());
+    var query = $.trim($(this).find("input").val());
 
     if (filter && filterOptions[filter].indexOf("DATA") > 0 && query == "") {
       alert("Please specify filter query");
-      return
+      return;
     }
 
     showTableContent();
   });
 
-  $(".change-limit").on("click", function() {
+  $(".change-limit").on("click", function () {
     var limit = prompt("Please specify a new rows limit", getRowsLimit());
 
     if (limit && limit >= 1) {
@@ -1311,33 +1490,32 @@ $(document).ready(function() {
     }
   });
 
-  $("select.filter").on("change", function(e) {
+  $("select.filter").on("change", function (e) {
     var val = $(this).val();
 
     if (["null", "not_null"].indexOf(val) >= 0) {
       $(".filters input").hide().val("");
-    }
-    else {
+    } else {
       $(".filters input").show();
     }
   });
 
-  $("button.reset-filters").on("click", function() {
+  $("button.reset-filters").on("click", function () {
     $(".filters select, .filters input").val("");
     showTableContent();
   });
 
   // Automatically prefill the filter if it's not set yet
-  $("select.column").on("change", function() {
+  $("select.column").on("change", function () {
     if ($("select.filter").val() == "") {
       $("select.filter").val("equal");
       $("#table_filter_value").focus();
     }
   });
 
-  $("#pagination .next-page").on("click", function() {
+  $("#pagination .next-page").on("click", function () {
     var current = $(".current-page").data("page");
-    var total   = $(".current-page").data("pages");
+    var total = $(".current-page").data("pages");
 
     if (total > current) {
       $(".current-page").data("page", current + 1);
@@ -1353,7 +1531,7 @@ $(document).ready(function() {
     }
   });
 
-  $("#pagination .prev-page").on("click", function() {
+  $("#pagination .prev-page").on("click", function () {
     var current = $(".current-page").data("page");
 
     if (current > 1) {
@@ -1374,20 +1552,20 @@ $(document).ready(function() {
     });
   });
 
-  $("#database_search").change(function(e) {
+  $("#database_search").change(function (e) {
     var current = $("#database_search").typeahead("getActive");
     if (current && current == $("#database_search").val()) {
-      apiCall("post", "/switchdb", { db: current }, function(resp) {
+      apiCall("post", "/switchdb", { db: current }, function (resp) {
         if (resp.error) {
           alert(resp.error);
           return;
-        };
+        }
         window.location.reload();
       });
-    };
+    }
   });
 
-  $("#edit_connection").on("click", function() {
+  $("#edit_connection").on("click", function () {
     if (connected) {
       $("#close_connection_window").show();
     }
@@ -1395,8 +1573,8 @@ $(document).ready(function() {
     showConnectionSettings();
   });
 
-  $("#close_connection").on("click", function() {
-    if (!confirm("Are you sure you want to disconnect?")) return;
+  $("#close_connection").on("click", function () {
+    if (!confirm("确认断开链接?")) return;
 
     disconnect(function() {
       showConnectionSettings();
@@ -1405,17 +1583,17 @@ $(document).ready(function() {
     });
   });
 
-  $("#close_connection_window").on("click", function() {
+  $("#close_connection_window").on("click", function () {
     $("#connection_window").hide();
   });
 
-  $("#connection_url").on("change", function() {
+  $("#connection_url").on("change", function () {
     if ($(this).val().indexOf("localhost") != -1) {
       $("#connection_ssl").val("disable");
     }
   });
 
-  $("#pg_host").on("change", function() {
+  $("#pg_host").on("change", function () {
     var value = $(this).val();
 
     if (value.indexOf("localhost") != -1 || value.indexOf("127.0.0.1") != -1) {
@@ -1423,11 +1601,11 @@ $(document).ready(function() {
     }
   });
 
-  $(".connection-group-switch button").on("click", function() {
+  $(".connection-group-switch button").on("click", function () {
     $(".connection-group-switch button").removeClass("active");
     $(this).addClass("active");
 
-    switch($(this).attr("data")) {
+    switch ($(this).attr("data")) {
       case "scheme":
         $(".connection-scheme-group").show();
         $(".connection-standard-group").hide();
@@ -1446,7 +1624,7 @@ $(document).ready(function() {
     }
   });
 
-  $("#connection_bookmarks").on("change", function(e) {
+  $("#connection_bookmarks").on("change", function (e) {
     var name = $.trim($(this).val());
     if (name == "") return;
 
@@ -1475,8 +1653,7 @@ $(document).ready(function() {
       $("#ssh_key").val(item.ssh.key);
       $("#ssh_key_password").val(item.ssh.keypassword);
       $("#connection_ssh").click();
-    }
-    else {
+    } else {
       $("#ssh_host").val("");
       $("#ssh_port").val("");
       $("#ssh_user").val("");
@@ -1488,12 +1665,12 @@ $(document).ready(function() {
     }
   });
 
-  $("#connection_form").on("submit", function(e) {
+  $("#connection_form").on("submit", function (e) {
     e.preventDefault();
 
     var button = $(this).find("button.open-connection");
     var params = {
-      url: getConnectionString()
+      url: getConnectionString(),
     };
 
     if (params.url.length == 0) {
@@ -1501,13 +1678,13 @@ $(document).ready(function() {
     }
 
     if ($(".connection-group-switch button.active").attr("data") == "ssh") {
-      params["ssh"]              = 1
-      params["ssh_host"]         = $("#ssh_host").val();
-      params["ssh_port"]         = $("#ssh_port").val();
-      params["ssh_user"]         = $("#ssh_user").val();
-      params["ssh_password"]     = $("#ssh_password").val();
-      params["ssh_key"]          = $("#ssh_key").val();
-      params["ssh_key_password"] = $("#ssh_key_password").val()
+      params["ssh"] = 1;
+      params["ssh_host"] = $("#ssh_host").val();
+      params["ssh_port"] = $("#ssh_port").val();
+      params["ssh_user"] = $("#ssh_user").val();
+      params["ssh_password"] = $("#ssh_password").val();
+      params["ssh_key"] = $("#ssh_key").val();
+      params["ssh_key_password"] = $("#ssh_key_password").val();
     }
 
     $("#connection_error").hide();
@@ -1519,8 +1696,7 @@ $(document).ready(function() {
       if (resp.error) {
         connected = false;
         $("#connection_error").text(resp.error).show();
-      }
-      else {
+      } else {
         connected = true;
         loadSchemas();
 
@@ -1543,7 +1719,7 @@ $(document).ready(function() {
     window.history.pushState({}, document.title, window.location.pathname);
   }
 
-  apiCall("get", "/connection", {}, function(resp) {
+  apiCall("get", "/connection", {}, function (resp) {
     if (resp.error) {
       connected = false;
       showConnectionSettings();

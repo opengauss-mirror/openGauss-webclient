@@ -28,7 +28,7 @@ var (
 	cockroachType      = "CockroachDB"
 
 	openGaussSignature = regexp.MustCompile(`(?i)openGauss ([\d\.]+)\s`)
-	openGaussType      = "PostgreSQL"
+	openGaussType      = "openGauss"
 )
 
 type Client struct {
@@ -171,10 +171,14 @@ func (client *Client) setServerVersion() {
 
 	matches = openGaussSignature.FindAllStringSubmatch(version, 1)
 	if len(matches) > 0 {
-		client.serverType = postgresType
+		client.serverType = openGaussType
 		client.serverVersion = matches[0][1]
 		return
 	}
+}
+
+func (client *Client) SetApplicationName() (*Result, error) {
+	return client.query(statements.SetApplication)
 }
 
 func (client *Client) Test() error {
@@ -248,7 +252,7 @@ func (client *Client) EstimatedTableRowsCount(table string, opts RowsOptions) (*
 
 func (client *Client) TableRowsCount(table string, opts RowsOptions) (*Result, error) {
 	// Return postgres estimated rows count on empty filter
-	if opts.Where == "" && client.serverType == postgresType {
+	if opts.Where == "" && (client.serverType == postgresType || client.serverType == openGaussType) {
 		res, err := client.EstimatedTableRowsCount(table, opts)
 		if err != nil {
 			return nil, err
@@ -349,6 +353,12 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 		client.lastQueryTime = time.Now().UTC()
 	}()
 
+	// we just allow one statment per exectution
+	semicolonIndex := strings.Index(strings.TrimSpace(query), ";")
+	if semicolonIndex != -1 && semicolonIndex < len(query)-1 {
+		return nil, errors.New("only one statment allowed to execute per query")
+	}
+
 	// We're going to force-set transaction mode on every query.
 	// This is needed so that default mode could not be changed by user.
 	if command.Opts.ReadOnly {
@@ -361,7 +371,7 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 	}
 
 	action := strings.ToLower(strings.Split(query, " ")[0])
-	if action == "update" || action == "delete" {
+	if action == "update" || action == "delete" || action == "insert" {
 		res, err := client.db.Exec(query, args...)
 		if err != nil {
 			return nil, err
@@ -377,6 +387,7 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 			Rows: []Row{
 				Row{affected},
 			},
+			Action: action,
 		}
 
 		return &result, nil
@@ -400,10 +411,19 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 	if cols == nil {
 		cols = []string{}
 	}
-
-	result := Result{
-		Columns: cols,
-		Rows:    []Row{},
+	var result Result
+	if action == "select" {
+		result = Result{
+			Columns: cols,
+			Rows:    []Row{},
+			Action:  "select",
+		}
+	} else {
+		result = Result{
+			Columns: cols,
+			Rows:    []Row{},
+			Action:  "dcl",
+		}
 	}
 
 	for rows.Next() {
@@ -427,7 +447,6 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 	}
 
 	result.PostProcess()
-
 	return &result, nil
 }
 

@@ -8,7 +8,7 @@
   left: 250px;
   right: 0;
   height: 50px;
-  background: #79589f;
+  background: #7d32ea;
 }
 
 #nav ul {
@@ -54,7 +54,8 @@
   content: ' ';
   position: absolute;
   bottom: -1px;
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   height: 1px;
   widows: 100%;
   background: #fff;
@@ -84,7 +85,7 @@
   font-weight: bold;
   font-size: 14px;
   color: #fff;
-  background: #79589f;
+  background: #7d32ea;
   z-index: 900;
 }
 
@@ -122,7 +123,7 @@
 
 #sidebar .current-database input.typeahead {
   display: none;
-  background: #79589f;
+  background: #7d32ea;
   width: 200px;
   height: 22px;
   color: #fff;
@@ -199,7 +200,7 @@
   color: #888;
 }
 
-#sidebar .objects-search input[type="text"] {
+#sidebar .objects-search input[type='text'] {
   background: transparent;
   border: 0px none;
   font-size: 12px;
@@ -226,8 +227,9 @@
   overflow: auto;
 }
 
-
-#sidebar div.tables-list #tables, #sequences, #objects {
+#sidebar div.tables-list #tables,
+#sequences,
+#objects {
   font-size: 12px;
 }
 
@@ -264,11 +266,11 @@
   height: 24px;
   padding: 0 8px 0 8px;
   font-size: 12px;
-  color: #7F7E7F !important;
+  color: #7f7e7f !important;
 }
 
 #sidebar div.table-information .lines .line span {
-  color: #4F4F4F;
+  color: #4f4f4f;
   min-width: 0;
   padding-left: 0px;
 }
@@ -323,8 +325,8 @@
 }
 
 #input .actions .btn-primary {
-  border-color: #7eb54e;
-  color: #7eb54e;
+  border-color: #7d32ea;
+  color: #7d32ea;
 }
 
 #input .actions .btn:hover {
@@ -334,8 +336,8 @@
 }
 
 #input .actions .btn-primary:hover {
-  color: #64903e;
-  border-color: #64903e;
+  color: #7d32ea;
+  border-color: #7d32ea;
 }
 
 #input .actions #query_progress {
@@ -424,7 +426,7 @@
 }
 
 #pagination .filters select.filter {
-  width: 100px;
+  width: 130px;
 }
 
 #pagination .filters input {
@@ -437,8 +439,8 @@
 }
 
 #pagination .filters .btn-primary {
-  border-color: #7eb54e;
-  color: #7eb54e;
+  border-color: #7d32ea;
+  color: #7d32ea;
   background: #fff;
   outline: none;
   float: left;
@@ -507,7 +509,7 @@
   background: #f3faff;
 }
 
-#results[data-mode="browse"] th:hover {
+#results[data-mode='browse'] th:hover {
   cursor: pointer;
   background: #fafafa;
 }
@@ -600,8 +602,9 @@
   display: none;
 }
 
-#edit_connection, #close_connection {
-  background: #79589f;
+#edit_connection,
+#close_connection {
+  background: #7d32ea;
   color: #fff;
   border-color: #fff;
 }
@@ -689,12 +692,24 @@
 /* Sidebar Schema Objects */
 /* -------------------------------------------------------------------------- */
 
-.schema {}
-.schema i                           { display: inline-block; margin-right: 4px; }
-.schema i.fa-folder-o               { display: inline-block; }
-.schema i.fa-folder-open-o          { display: none; }
-.schema.expanded i.fa-folder-open-o { display: inline-block; }
-.schema.expanded i.fa-folder-o      { display: none; }
+.schema {
+}
+.schema i {
+  display: inline-block;
+  margin-right: 4px;
+}
+.schema i.fa-folder-o {
+  display: inline-block;
+}
+.schema i.fa-folder-open-o {
+  display: none;
+}
+.schema.expanded i.fa-folder-open-o {
+  display: inline-block;
+}
+.schema.expanded i.fa-folder-o {
+  display: none;
+}
 
 .schema .schema-name {
   font-weight: bold;
@@ -784,7 +799,8 @@
 /* Ace Customizations */
 /* -------------------------------------------------------------------------- */
 
-.ace_gutter, .ace_gutter-cell {
+.ace_gutter,
+.ace_gutter-cell {
   background: #fff !important;
   color: #bbb;
   font-size: 12px;
@@ -796,4 +812,8 @@
 
 .ace_autocomplete .ace_active-line {
   background: #eee !important;
+}
+
+.hidden {
+  display: none;
 }
