@@ -353,6 +353,12 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 		client.lastQueryTime = time.Now().UTC()
 	}()
 
+	// we just allow one statment per exectution
+	semicolonIndex := strings.Index(strings.TrimSpace(query), ";")
+	if semicolonIndex != -1 && semicolonIndex < len(query)-1 {
+		return nil, errors.New("only one statment allowed to execute per query")
+	}
+
 	// We're going to force-set transaction mode on every query.
 	// This is needed so that default mode could not be changed by user.
 	if command.Opts.ReadOnly {
