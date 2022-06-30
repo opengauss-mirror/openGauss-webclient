@@ -149,7 +149,7 @@ LEFT JOIN
 WHERE
   c.relkind IN ('r','v','m','S','s','') AND
   n.nspname !~ '^pg_toast' AND 
-  n.nspname NOT IN ('information_schema', 'pg_catalog') AND
+  n.nspname NOT IN ('information_schema', 'pg_catalog', 'db4ai', 'dbe_pldeveloper') AND
   has_schema_privilege(n.nspname, 'USAGE')
 ORDER BY 1, 2`
 
