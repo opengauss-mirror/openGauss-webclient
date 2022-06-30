@@ -25,6 +25,7 @@ type Result struct {
 	Pagination *Pagination `json:"pagination,omitempty"`
 	Columns    []string    `json:"columns"`
 	Rows       []Row       `json:"rows"`
+	Action     string      `json:"action"`
 }
 
 type Objects struct {

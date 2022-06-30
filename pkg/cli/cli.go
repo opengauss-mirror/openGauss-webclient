@@ -118,6 +118,9 @@ func initClient() {
 		fmt.Printf("Connected to %s\n", cl.ServerVersion())
 	}
 
+	fmt.Println("Set application name...")
+	cl.SetApplicationName()
+
 	fmt.Println("Checking database objects...")
 	_, err = cl.Objects()
 	if err != nil {
@@ -217,6 +220,7 @@ func openPage() {
 
 	_, err := exec.Command("which", "open").Output()
 	if err != nil {
+		fmt.Println("open command not exist, skip open page")
 		return
 	}
 

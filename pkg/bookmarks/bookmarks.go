@@ -91,7 +91,7 @@ func fileBasename(path string) string {
 func Path(overrideDir string) string {
 	if overrideDir == "" {
 		path, _ := homedir.Dir()
-		return fmt.Sprintf("%s/.pgweb/bookmarks", path)
+		return fmt.Sprintf("%s/.openGauss-webclient/bookmarks", path)
 	}
 	return overrideDir
 }
