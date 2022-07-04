@@ -1751,18 +1751,14 @@ function start() {
     if (resp.error) {
       connected = false;
       console.error("connection error: %s", resp.error);
-      //showConnectionSettings();
-      //$(".connection-actions").show();
+      $(".connection-actions").show();
     } else {
       connected = true;
       loadSchemas();
 
       $("#current_database").text(resp.current_database);
       $("#main").show();
-
-      if (!resp.session_lock) {
-        $(".connection-actions").show();
-      }
+      $(".connection-actions").show();
     }
   });
 
