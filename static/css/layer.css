@@ -32,3 +32,13 @@
     height: 100px;
     background-size: 100px 100px;
   }
+  .go-on .layui-layer-btn .layui-layer-btn0 {
+    border-color: #dedede;
+    background-color: #ffffff;
+    color: #333333;
+  }
+  .go-on .layui-layer-btn .layui-layer-btn1 {
+    border-color: #7d32ea;
+    background-color: #7d32ea;
+    color: #ffffff;
+  }
