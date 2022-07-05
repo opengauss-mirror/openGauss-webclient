@@ -292,7 +292,7 @@ function performTableAction(table, action, el) {
   message += "表 " + table + " ?";
   switch (action) {
     case "truncate":
-      layer.confirm(message, { title: "提示" }, function (index) {
+      layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
         executeQuery("TRUNCATE TABLE " + table, function (data) {
           if (data.error) layer.alert(data.error);
           resetTable();
@@ -301,7 +301,7 @@ function performTableAction(table, action, el) {
       });
       break;
     case "delete":
-      layer.confirm(message, { title: "提示" }, function (index) {
+      layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
         executeQuery("DROP TABLE " + table, function (data) {
           if (data.error) layer.alert(data.error);
           loadSchemas();
@@ -348,7 +348,7 @@ function performViewAction(view, action, el) {
   switch (action) {
     case "delete":
       var message = "确认要删除视图 " + view + " ?";
-      layer.confirm(message, { title: "提示" }, function (index) {
+      layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
         executeQuery("DROP VIEW " + view, function (data) {
           if (data.error) layer.alert(data.error);
           loadSchemas();
@@ -383,7 +383,7 @@ function performViewAction(view, action, el) {
 
 function performRowAction(action, value) {
   if (action == "stop_query") {
-    layer.confirm(message, { title: "提示" }, function (index) {
+    layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
       executeQuery("SELECT pg_cancel_backend(" + value + ");", function (data) {
         if (data.error) layer.alert(data.error);
         setTimeout(showActivityPanel, 1000);
@@ -1595,7 +1595,7 @@ function start() {
   });
 
   $("#close_connection").on("click", function () {
-    layer.confirm("确认退出?", { title: "提示" }, function (index) {
+    layer.confirm("确认退出?", { title: "提示",skin:"go-on" }, function (index) {
       disconnect(function () {
         var userAgent = navigator.userAgent;
         if (
