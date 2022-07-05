@@ -287,25 +287,27 @@ function resetTable() {
 }
 
 function performTableAction(table, action, el) {
-  if (action == "truncate" || action == "delete") {
-    var message = "确认要";
-    message += action == "truncate" ? "清空" : "删除";
-    message += "表 " + table + " ?";
-    if (!confirm(message)) return;
-  }
-
+  var message = "确认要";
+  message += action == "truncate" ? "清空" : "删除";
+  message += "表 " + table + " ?";
   switch (action) {
     case "truncate":
-      executeQuery("TRUNCATE TABLE " + table, function (data) {
-        if (data.error) alert(data.error);
-        resetTable();
+      layer.confirm(message, { title: "提示" }, function (index) {
+        executeQuery("TRUNCATE TABLE " + table, function (data) {
+          if (data.error) layer.alert(data.error);
+          resetTable();
+        });
+        layer.close(index);
       });
       break;
     case "delete":
-      executeQuery("DROP TABLE " + table, function (data) {
-        if (data.error) alert(data.error);
-        loadSchemas();
-        resetTable();
+      layer.confirm(message, { title: "提示" }, function (index) {
+        executeQuery("DROP TABLE " + table, function (data) {
+          if (data.error) layer.alert(data.error);
+          loadSchemas();
+          resetTable();
+        });
+        layer.close(index);
       });
       break;
     case "export":
@@ -343,17 +345,16 @@ function performTableAction(table, action, el) {
 }
 
 function performViewAction(view, action, el) {
-  if (action == "delete") {
-    var message = "确认要删除视图 " + view + " ?";
-    if (!confirm(message)) return;
-  }
-
   switch (action) {
     case "delete":
-      executeQuery("DROP VIEW " + view, function (data) {
-        if (data.error) alert(data.error);
-        loadSchemas();
-        resetTable();
+      var message = "确认要删除视图 " + view + " ?";
+      layer.confirm(message, { title: "提示" }, function (index) {
+        executeQuery("DROP VIEW " + view, function (data) {
+          if (data.error) layer.alert(data.error);
+          loadSchemas();
+          resetTable();
+        });
+        layer.close(index);
       });
       break;
     case "export":
@@ -382,10 +383,12 @@ function performViewAction(view, action, el) {
 
 function performRowAction(action, value) {
   if (action == "stop_query") {
-    if (!confirm("确认终止查询?")) return;
-    executeQuery("SELECT pg_cancel_backend(" + value + ");", function (data) {
-      if (data.error) alert(data.error);
-      setTimeout(showActivityPanel, 1000);
+    layer.confirm(message, { title: "提示" }, function (index) {
+      executeQuery("SELECT pg_cancel_backend(" + value + ");", function (data) {
+        if (data.error) layer.alert(data.error);
+        setTimeout(showActivityPanel, 1000);
+      });
+      layer.close(index);
     });
   }
 }
@@ -522,7 +525,7 @@ function showTableIndexes() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("请选择表后再进行操作!");
+    layer.alert("请选择表后再进行操作!");
     return;
   }
 
@@ -540,7 +543,7 @@ function showTableConstraints() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("请选择表后再进行操作!");
+    layer.alert("请选择表后再进行操作!");
     return;
   }
 
@@ -558,7 +561,7 @@ function showTableInfo() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("请选择表后再进行操作!");
+    layer.alert("请选择表后再进行操作!");
     return;
   }
 
@@ -607,7 +610,7 @@ function showTableContent(sortColumn, sortOrder) {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("请选择表后再进行操作!");
+    layer.alert("请选择表后再进行操作!");
     return;
   }
 
@@ -663,7 +666,7 @@ function showTableStructure() {
   var name = getCurrentObject().name;
 
   if (name.length == 0) {
-    alert("请选择表后再进行操作!");
+    layer.alert("请选择表后再进行操作!");
     return;
   }
 
@@ -1491,7 +1494,7 @@ function start() {
     var query = $.trim($(this).find("input").val());
 
     if (filter && filterOptions[filter].indexOf("DATA") > 0 && query == "") {
-      alert("Please specify filter query");
+      layer.alert("Please specify filter query");
       return;
     }
 
@@ -1575,7 +1578,7 @@ function start() {
     if (current && current == $("#database_search").val()) {
       apiCall("post", "/switchdb", { db: current }, function (resp) {
         if (resp.error) {
-          alert(resp.error);
+          layer.alert(resp.error);
           return;
         }
         window.location.reload();
@@ -1592,22 +1595,23 @@ function start() {
   });
 
   $("#close_connection").on("click", function () {
-    if (!confirm("确认退出?")) return;
-
-    disconnect(function () {
-      var userAgent = navigator.userAgent;
-      if (
-        userAgent.indexOf("Firefox") != -1 ||
-        userAgent.indexOf("Chrome") != -1
-      ) {
-        window.location.href = "about:blank";
-        window.close();
-      } else {
-        window.opener = null;
-        window.open("", "_self");
-        window.close();
-      }
-      window.parent.postMessage({ events: "logout" }, "*");
+    layer.confirm("确认退出?", { title: "提示" }, function (index) {
+      disconnect(function () {
+        var userAgent = navigator.userAgent;
+        if (
+          userAgent.indexOf("Firefox") != -1 ||
+          userAgent.indexOf("Chrome") != -1
+        ) {
+          window.location.href = "about:blank";
+          window.close();
+        } else {
+          window.opener = null;
+          window.open("", "_self");
+          window.close();
+        }
+        window.parent.postMessage({ events: "logout" }, "*");
+      });
+      layer.close(index);
     });
   });
 
@@ -1800,7 +1804,9 @@ function handleMessage(e) {
 }
 
 $(document).ready(function () {
+  var index = layer.load(0, {shade: false})
   apiCall("get", "/debugmode", {}, function (resp) {
+    layer.close(index);
     if (!resp.error && resp.debug_mode) {
       start();
     }
