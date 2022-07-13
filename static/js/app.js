@@ -292,7 +292,7 @@ function performTableAction(table, action, el) {
   message += "表 " + table + " ?";
   switch (action) {
     case "truncate":
-      layer.confirm(message, { title: "提示" }, function (index) {
+      layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
         executeQuery("TRUNCATE TABLE " + table, function (data) {
           if (data.error) layer.alert(data.error);
           resetTable();
@@ -301,7 +301,7 @@ function performTableAction(table, action, el) {
       });
       break;
     case "delete":
-      layer.confirm(message, { title: "提示" }, function (index) {
+      layer.confirm(message, { title: "提示" ,skin:"go-on"}, function (index) {
         executeQuery("DROP TABLE " + table, function (data) {
           if (data.error) layer.alert(data.error);
           loadSchemas();
@@ -348,7 +348,7 @@ function performViewAction(view, action, el) {
   switch (action) {
     case "delete":
       var message = "确认要删除视图 " + view + " ?";
-      layer.confirm(message, { title: "提示" }, function (index) {
+      layer.confirm(message, { title: "提示" ,skin:"go-on"}, function (index) {
         executeQuery("DROP VIEW " + view, function (data) {
           if (data.error) layer.alert(data.error);
           loadSchemas();
@@ -383,7 +383,7 @@ function performViewAction(view, action, el) {
 
 function performRowAction(action, value) {
   if (action == "stop_query") {
-    layer.confirm(message, { title: "提示" }, function (index) {
+    layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
       executeQuery("SELECT pg_cancel_backend(" + value + ");", function (data) {
         if (data.error) layer.alert(data.error);
         setTimeout(showActivityPanel, 1000);
@@ -493,14 +493,19 @@ function setCurrentTab(id) {
   if (id != "table_content") {
     $("#body").removeClass("with-pagination");
   }
-
+  if (id === "table_created") {
+    $(".created").show();
+    $("#output").hide();
+  } else {
+    $(".created").hide();
+    $("#output").show();
+  }
   $("#nav ul li.selected").removeClass("selected");
   $("#" + id).addClass("selected");
 
   // Persist tab selection into the session storage
   sessionStorage.setItem("tab", id);
 }
-
 function showQueryHistory() {
   getHistory(function (data) {
     var rows = [];
@@ -605,7 +610,14 @@ function updatePaginator(pagination) {
   if (pagination.pages_count == 0) pagination.pages_count = 1;
   $("button.page").text(pagination.page + " of " + pagination.pages_count);
 }
-
+// 点击新建
+function showTableCreated() {
+  setCurrentTab("table_created");
+  
+  $("#input").hide();
+  $("#body").prop("class", "full");
+  $("#results").addClass("no-crop");
+}
 function showTableContent(sortColumn, sortOrder) {
   var name = getCurrentObject().name;
 
@@ -1369,6 +1381,9 @@ function enableDatabaseSearch(data) {
 
 function start() {
   $("body").removeClass("hidden");
+  $("#table_created").on("click", function () {
+    showTableCreated();
+  });
   $("#table_content").on("click", function () {
     showTableContent();
   });
@@ -1595,7 +1610,7 @@ function start() {
   });
 
   $("#close_connection").on("click", function () {
-    layer.confirm("确认退出?", { title: "提示" }, function (index) {
+    layer.confirm("确认退出?", { title: "提示",skin:"go-on" }, function (index) {
       disconnect(function () {
         var userAgent = navigator.userAgent;
         if (
@@ -1804,7 +1819,7 @@ function handleMessage(e) {
 }
 
 $(document).ready(function () {
-  var index = layer.load(0, {shade: false})
+  var index = layer.load(0, { shade: false });
   apiCall("get", "/debugmode", {}, function (resp) {
     layer.close(index);
     if (!resp.error && resp.debug_mode) {

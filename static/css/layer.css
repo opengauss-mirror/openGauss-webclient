@@ -1,34 +1,44 @@
 .layui-layer-btn .layui-layer-btn0 {
-    border-color: #7d32ea ;
-    background-color: #7d32ea ;
-  }
-  .layui-layer-dialog {
-    min-width: 550px ;
-  }
-  .layui-layer-title {
-    margin: 40px 40px 8px 40px ;
-    padding: 0 ;
-    height: 32px ;
-    line-height: 32px ;
-    font-size: 24px ;
-    font-weight: 700 ;
-    border: none ;
-  }
-  .layui-layer-dialog .layui-layer-content {
-    margin: 8px 40px 0px 40px ;
-    padding: 0 ;
-  }
-  .layui-layer-btn {
-    margin: 40px 40px 0 40px ;
-  }
-  .layui-layer-btn a {
-    width: 123px ;
-    height: 43px ;
-    text-align: center ;
-    line-height: 43px ;
-  }
-  .layui-layer-loading .layui-layer-content{
-    width: 100px;
-    height: 100px;
-    background-size: 100px 100px;
-  }
+  border-color: #7d32ea;
+  background-color: #7d32ea;
+}
+.layui-layer-dialog {
+  min-width: 550px;
+}
+.layui-layer-title {
+  margin: 40px 40px 8px 40px;
+  padding: 0;
+  height: 32px;
+  line-height: 32px;
+  font-size: 24px;
+  font-weight: 700;
+  border: none;
+}
+.layui-layer-dialog .layui-layer-content {
+  margin: 8px 40px 0px 40px;
+  padding: 0;
+}
+.layui-layer-btn {
+  margin: 40px 40px 0 40px;
+}
+.layui-layer-btn a {
+  width: 123px;
+  height: 43px;
+  text-align: center;
+  line-height: 43px;
+}
+.layui-layer-loading .layui-layer-content {
+  width: 100px;
+  height: 100px;
+  background-size: 100px 100px;
+}
+.go-on .layui-layer-btn .layui-layer-btn0 {
+  border-color: #dedede;
+  background-color: #ffffff;
+  color: #333333;
+}
+.go-on .layui-layer-btn .layui-layer-btn1 {
+  border-color: #7d32ea;
+  background-color: #7d32ea;
+  color: #ffffff;
+}
