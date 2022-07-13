@@ -2,7 +2,7 @@ package command
 
 const (
 	// Version is the current openGauss-webclient application version
-	Version = "1.0.1"
+	Version = "1.0.2"
 )
 
 var (

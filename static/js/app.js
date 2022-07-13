@@ -301,7 +301,7 @@ function performTableAction(table, action, el) {
       });
       break;
     case "delete":
-      layer.confirm(message, { title: "提示" ,skin:"go-on"}, function (index) {
+      layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
         executeQuery("DROP TABLE " + table, function (data) {
           if (data.error) layer.alert(data.error);
           loadSchemas();
@@ -348,7 +348,7 @@ function performViewAction(view, action, el) {
   switch (action) {
     case "delete":
       var message = "确认要删除视图 " + view + " ?";
-      layer.confirm(message, { title: "提示" ,skin:"go-on"}, function (index) {
+      layer.confirm(message, { title: "提示",skin:"go-on" }, function (index) {
         executeQuery("DROP VIEW " + view, function (data) {
           if (data.error) layer.alert(data.error);
           loadSchemas();
