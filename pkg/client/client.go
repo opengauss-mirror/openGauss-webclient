@@ -29,6 +29,8 @@ var (
 
 	openGaussSignature = regexp.MustCompile(`(?i)openGauss ([\d\.]+)\s`)
 	openGaussType      = "openGauss"
+
+	createFuncProc = regexp.MustCompile(`(?i)create(\s)+(or(\s)+replace(\s)+)?(function|procedure)`)
 )
 
 type Client struct {
@@ -353,9 +355,10 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 		client.lastQueryTime = time.Now().UTC()
 	}()
 
-	// we just allow one statment per exectution
+	// we just allow one statment per exectution， except for procedure and function
 	semicolonIndex := strings.Index(strings.TrimSpace(query), ";")
-	if semicolonIndex != -1 && semicolonIndex < len(query)-1 {
+	if semicolonIndex != -1 && semicolonIndex < len(query)-1 &&
+		createFuncProc.FindAllStringSubmatch(query, -1) == nil {
 		return nil, errors.New("only one statment allowed to execute per query")
 	}
 
