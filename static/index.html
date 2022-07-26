@@ -27,8 +27,21 @@
 <body class="hidden">
   <div id="main">
     <div id="nav">
+      
       <ul>
-        <li id="table_created">新建</li>
+        <li id="table_created">新建
+          <ul class="created_list">
+            <li id="table">表</li>
+            <li id="view">视图</li>
+            <li id="function">函数</li>
+            <li id="save">存储过程</li>
+            <li id="software">程序包</li>
+            <li id="trigger">触发器</li>
+            <li id="type">类型</li>
+            <li id="order">序列</li>
+            <li id="synonym">同义词</li>
+          </ul>
+        </li>
         <li id="table_content">数据</li>
         <li id="table_structure">表结构</li>
         <li id="table_indexes">索引</li>
@@ -166,9 +179,9 @@
                   fill="currentcolor"
                 />
               </svg>
-              <span>Created-Table</span>
+              <span>新建表</span>
             </div>
-            <svg
+            <!-- <svg
               class="icon-close icon created-close"
               viewBox="0 0 1024 1024"
               xmlns="http://www.w3.org/2000/svg"
@@ -179,58 +192,54 @@
                 d="M912.527 867.741 555.54 510.713l356.987-357.001c11.171-11.186 11.171-29.258 0-40.443-11.201-11.186-29.273-11.186-40.444 0L515.096 470.268l-357-357c-11.188-11.16-29.258-11.16-40.444 0-11.187 11.186-11.187 29.286 0 40.471l356.971 356.974-357 357.028c-11.159 11.173-11.159 29.217 0 40.443 11.186 11.174 29.285 11.174 40.472 0l357.001-357.027 356.985 357.027c11.172 11.174 29.244 11.174 40.445 0 11.172-11.226 11.2-29.27 0-40.443z"
                 fill="currentcolor"
               />
-            </svg>
+            </svg> -->
           </h3>
           <ul class="created-choose">
-            <li class="active" id="general">General</li>
-            <li id="columns">Columns</li>
-            <li id="advanced">Advanced</li>
-            <li id="constraints">Constraints</li>
-            <li id="parameters">Parameters</li>
-            <li id="security">Security</li>
-            <li id="sql">SQL</li>
+            <li class="active" id="general">基本信息</li>
+            <li id="columns">设置列</li>
+            <li id="advanced">设置区分规则</li>
+            <li id="constraints">设置索引</li>
+            <li id="parameters">设置约束</li>
           </ul>
           <div class="created-content">
-            <ul class="created-general">
-              <li>
-                <span>Name</span>
-                <input type="text" />
-              </li>
-              <li>
-                <span>Owner</span>
-                <select >
-                  <option value=""></option>
-                </select>
-              </li>
-              <li>
-                <span>Schema</span>
-                <select >
-                  <option value=""></option>
-                </select>
-              </li>
-              <li>
-                <span>Tablespace</span>
-                <select >
-                  <option value=""></option>
-                </select>
-              </li>
-              <li>
-                <span>Comment</span>
+            <div class="created-general">
+              <ul>
+                <li>
+                  <span>表名称</span>
+                  <input type="text" />
+                </li>
+                <li>
+                  <span>默认字符集</span>
+                  <select >
+                    <option value="utf8mb4">utf8mb4</option>
+                  </select>
+                </li>
+                <li>
+                  <span>默认排序规则</span>
+                  <select >
+                    <option value="utf8mb4_general_ci">utf8mb4_general_ci</option>
+                    <option value="utf8mb4_bin">utf8mb4_bin</option>
+                    <option value="utf8mb4_unicode_ci">utf8mb4_unicode_ci</option>
+                  </select>
+                </li>
+              </ul>
+              <div class="descripe">
+                <span>描述</span>
                 <textarea  cols="30" rows="10"></textarea>
-              </li>
-            </ul>
+              </div>
+            </div>
             <div class="created-columns">
-              <div class="table-model">
+              <!-- <div class="table-model">
                 <span>inherit from table(s)</span>
                 <input
                   class="table-model-name"
                   type="text"
                   placeholder="Select to inherit from..."
                 />
-              </div>
+              </div> -->
               <div class="columns-content">
                 <div class="title">
-                  <span>Columns</span>
+                  <!-- <span>Columns</span> -->
                   <div class="columns-add">
                     <svg
                       width="24px"
@@ -250,15 +259,17 @@
                   </div>
                 </div>
                 <ul class="columns-list">
-                  <li>Name</li>
-                  <li>Name</li>
-                  <li>Name</li>
-                  <li>Name</li>
-                  <li>Name</li>
+                  <li></li>
+                  <li>字段名称</li>
+                  <li>数据类型</li>
+                  <li>非空</li>
+                  <li>自增</li>
+                  <li>缺省值</li>
+                  <li>字段注释</li>
                 </ul>
               </div>
             </div>
-            <div class="empty-alert">
+            <!-- <div class="empty-alert">
               <svg
                 class="icon icon-alert"
                 viewBox="0 0 1034 1024"
@@ -284,10 +295,10 @@
                   fill="currentcolor"
                 />
               </svg>
-            </div>
+            </div> -->
           </div>
           <div class="created-botton">
-            <ul class="question">
+            <!-- <ul class="question">
               <li>
                 <svg
                   class="icon-i icon"
@@ -315,9 +326,9 @@
                   />
                 </svg>
               </li>
-            </ul>
+            </ul> -->
             <ul class="result">
-              <li>
+              <!-- <li>
                 <svg
                   class="icon-cancel icon"
                   viewBox="0 0 1024 1024"
@@ -382,9 +393,9 @@
                   />
                 </svg>
                 <span>Reset</span>
-              </li>
+              </li> -->
               <li>
-                <svg
+                <!-- <svg
                   class="icon-save icon"
                   viewBox="0 0 1024 1024"
                   xmlns="http://www.w3.org/2000/svg"
@@ -394,8 +405,8 @@
                   <path
                     d="M704 128H192c-35.2 0-64 28.8-64 64v640c0 35.2 28.8 64 64 64h640c35.2 0 64-28.8 64-64V320L704 128zM256 256h320v128H256V256zm256 512c-70.4 0-128-57.6-128-128s57.6-128 128-128 128 57.6 128 128-57.6 128-128 128z"
                   />
-                </svg>
-                <span>Save</span>
+                </svg> -->
+                <span>提交</span>
               </li>
             </ul>
           </div>

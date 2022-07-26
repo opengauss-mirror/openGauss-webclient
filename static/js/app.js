@@ -493,9 +493,10 @@ function setCurrentTab(id) {
   if (id != "table_content") {
     $("#body").removeClass("with-pagination");
   }
-  if (id === "table_created") {
+  if (id === "table") {
     $(".created").show();
     $("#output").hide();
+    $("#body").show();
   } else {
     $(".created").hide();
     $("#output").show();
@@ -612,7 +613,7 @@ function updatePaginator(pagination) {
 }
 // 点击新建
 function showTableCreated() {
-  setCurrentTab("table_created");
+  setCurrentTab("table");
   
   $("#input").hide();
   $("#body").prop("class", "full");
@@ -1381,7 +1382,7 @@ function enableDatabaseSearch(data) {
 
 function start() {
   $("body").removeClass("hidden");
-  $("#table_created").on("click", function () {
+  $("#table").on("click", function () {
     showTableCreated();
   });
   $("#table_content").on("click", function () {

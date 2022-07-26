@@ -14,4 +14,19 @@ $(document).ready(function () {
   $(".created-close").on("click", function () {
     $(".created").hide();
   });
+  // 新增列
+  let order=1
+  $(".columns-add").on("click", function () {
+    $(".columns-content").append(`<ul class="columns-list">
+    <li>${order}</li>
+    <li><input type="text"></li>
+    <li><input type="text"></li>
+    <li><input type="text"></li>
+    <li><input type="text"></li>
+    <li><input type="text"></li>
+    <li><input type="text"></li>
+  </ul>`);
+  order++;
+  });
+  
 });
