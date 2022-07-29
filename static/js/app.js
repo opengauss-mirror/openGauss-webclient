@@ -493,14 +493,20 @@ function setCurrentTab(id) {
   if (id != "table_content") {
     $("#body").removeClass("with-pagination");
   }
-
+  if (id === "table") {
+    $(".created").show();
+    $("#output").hide();
+    $("#body").show();
+  } else {
+    $(".created").hide();
+    $("#output").show();
+  }
   $("#nav ul li.selected").removeClass("selected");
   $("#" + id).addClass("selected");
 
   // Persist tab selection into the session storage
   sessionStorage.setItem("tab", id);
 }
-
 function showQueryHistory() {
   getHistory(function (data) {
     var rows = [];
@@ -605,7 +611,14 @@ function updatePaginator(pagination) {
   if (pagination.pages_count == 0) pagination.pages_count = 1;
   $("button.page").text(pagination.page + " of " + pagination.pages_count);
 }
-
+// 点击新建
+function showTableCreated() {
+  setCurrentTab("table");
+  
+  $("#input").hide();
+  $("#body").prop("class", "full");
+  $("#results").addClass("no-crop");
+}
 function showTableContent(sortColumn, sortOrder) {
   var name = getCurrentObject().name;
 
@@ -1369,6 +1382,9 @@ function enableDatabaseSearch(data) {
 
 function start() {
   $("body").removeClass("hidden");
+  $("#table").on("click", function () {
+    showTableCreated();
+  });
   $("#table_content").on("click", function () {
     showTableContent();
   });
@@ -1804,7 +1820,7 @@ function handleMessage(e) {
 }
 
 $(document).ready(function () {
-  var index = layer.load(0, {shade: false})
+  var index = layer.load(0, { shade: false });
   apiCall("get", "/debugmode", {}, function (resp) {
     layer.close(index);
     if (!resp.error && resp.debug_mode) {
