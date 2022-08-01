@@ -276,6 +276,9 @@ box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 .columns-content .columns-list li input{
   width: 90%;
 }
+.columns-content .columns-list li select{
+  width: 90%;
+}
 .columns-content .columns-list li~li{
   border-left: 1px solid rgb(241, 241, 241);
 }

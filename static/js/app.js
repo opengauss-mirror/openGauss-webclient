@@ -4,6 +4,7 @@ var bookmarks = {};
 var default_rows_limit = 100;
 var currentObject = null;
 var autocompleteObjects = [];
+var shcemaNames = [];
 
 var filterOptions = {
   equal: "= 'DATA'",
@@ -230,7 +231,9 @@ function loadSchemas() {
       };
     }
 
+    shcemaNames = [];
     for (schema in data) {
+      shcemaNames.push(schema);
       $(buildSchemaSection(schema, data[schema])).appendTo("#objects");
     }
 
