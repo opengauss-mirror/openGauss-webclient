@@ -128,7 +128,7 @@ WHERE
 	// ---------------------------------------------------------------------------
 
 	Objects = `
-SELECT
+  SELECT
   n.nspname as "schema",
   c.relname as "name",
   CASE c.relkind
@@ -143,13 +143,13 @@ SELECT
   pg_catalog.pg_get_userbyid(c.relowner) as "owner",
   pg_catalog.obj_description(c.oid) as "comment"
 FROM
-  pg_catalog.pg_class c
+  pg_catalog.pg_namespace n
 LEFT JOIN
-  pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+  pg_catalog.pg_class c ON n.oid = c.relnamespace
 WHERE
-  c.relkind IN ('r','v','m','S','s','') AND
+  (c.relkind IN ('r','v','m','S','s','') OR c.relkind IS NULL) AND
   n.nspname !~ '^pg_toast' AND 
-  n.nspname NOT IN ('information_schema', 'pg_catalog', 'db4ai', 'dbe_pldeveloper') AND
+  n.nspname NOT IN ('information_schema', 'pg_catalog', 'db4ai', 'dbe_pldeveloper', 'dbe_perf', 'dbe_pldebugger', 'blockchain', 'cstore', 'pkg_service', 'snapshot', 'sqladvisor') AND
   has_schema_privilege(n.nspname, 'USAGE')
 ORDER BY 1, 2`
 
