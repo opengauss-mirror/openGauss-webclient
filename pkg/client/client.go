@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	_ "gitee.com/opengauss/openGauss-connector-go-pq"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 
 	"gitee.com/openGauss/openGauss-webclient/pkg/command"
 	"gitee.com/openGauss/openGauss-webclient/pkg/connection"
@@ -29,8 +29,6 @@ var (
 
 	openGaussSignature = regexp.MustCompile(`(?i)openGauss ([\d\.]+)\s`)
 	openGaussType      = "openGauss"
-
-	createFuncProc = regexp.MustCompile(`(?i)create(\s)+(or(\s)+replace(\s)+)?(function|procedure)`)
 )
 
 type Client struct {
@@ -72,7 +70,7 @@ func New() (*Client, error) {
 		return nil, err
 	}
 
-	db, err := sqlx.Open("postgres", str)
+	db, err := sqlx.Open("opengauss", str)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +129,7 @@ func NewFromUrl(url string, sshInfo *shared.SSHInfo) (*Client, error) {
 		return nil, fmt.Errorf("Database name is not provided")
 	}
 
-	db, err := sqlx.Open("postgres", url)
+	db, err := sqlx.Open("opengauss", url)
 	if err != nil {
 		return nil, err
 	}
@@ -354,13 +352,6 @@ func (client *Client) query(query string, args ...interface{}) (*Result, error) 
 	defer func() {
 		client.lastQueryTime = time.Now().UTC()
 	}()
-
-	// we just allow one statment per exectution， except for procedure and function
-	semicolonIndex := strings.Index(strings.TrimSpace(query), ";")
-	if semicolonIndex != -1 && semicolonIndex < len(query)-1 &&
-		createFuncProc.FindAllStringSubmatch(query, -1) == nil {
-		return nil, errors.New("only one statment allowed to execute per query")
-	}
 
 	// We're going to force-set transaction mode on every query.
 	// This is needed so that default mode could not be changed by user.

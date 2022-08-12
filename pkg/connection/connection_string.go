@@ -14,7 +14,7 @@ import (
 // Common errors
 var (
 	errCantDetectUser   = errors.New("Could not detect default username")
-	errInvalidURLFormat = errors.New("Invalid URL. Valid format: postgres://user:password@host:port/db?sslmode=mode")
+	errInvalidURLFormat = errors.New("Invalid URL. Valid format: opengauss://user:password@host:port/db?sslmode=mode")
 )
 
 // currentUser returns a current user name
@@ -34,7 +34,7 @@ func currentUser() (string, error) {
 
 // Check if connection url has a correct postgres prefix
 func hasValidPrefix(str string) bool {
-	return strings.HasPrefix(str, "postgres://") || strings.HasPrefix(str, "postgresql://")
+	return strings.HasPrefix(str, "opengauss://") || strings.HasPrefix(str, "opengauss://")
 }
 
 // Extract all query vals and return as a map
@@ -126,7 +126,7 @@ func BuildStringFromOptions(opts command.Options) (string, error) {
 	}
 
 	url := neturl.URL{
-		Scheme:   "postgres",
+		Scheme:   "opengauss",
 		Host:     fmt.Sprintf("%v:%v", opts.Host, opts.Port),
 		User:     neturl.UserPassword(opts.User, opts.Pass),
 		Path:     fmt.Sprintf("/%s", opts.DbName),

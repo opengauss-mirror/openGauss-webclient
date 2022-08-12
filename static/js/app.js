@@ -1128,7 +1128,7 @@ function getConnectionString() {
     }
 
     url =
-      "postgres://" +
+      "opengauss://" +
       user +
       ":" +
       pass +
