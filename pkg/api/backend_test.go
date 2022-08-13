@@ -57,12 +57,12 @@ func TestBackendFetchCredential(t *testing.T) {
 					},
 				},
 			},
-			cred: &BackendCredential{DatabaseURL: "postgres://hostname/bar"},
+			cred: &BackendCredential{DatabaseURL: "opengauss://hostname/bar"},
 		},
 		{
 			name:    "Success",
 			backend: Backend{Endpoint: "http://localhost:5555/success"},
-			cred:    &BackendCredential{DatabaseURL: "postgres://hostname/dbname"},
+			cred:    &BackendCredential{DatabaseURL: "opengauss://hostname/dbname"},
 		},
 	}
 
