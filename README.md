@@ -43,8 +43,8 @@ openGauss-webclient --host localhost --user myuser --db mydb
 Connection URL scheme is also supported:
 
 ```
-openGauss-webclient --url postgres://user:password@host:port/database?sslmode=[mode]
-openGauss-webclient --url "postgres:///database?host=/absolute/path/to/unix/socket/dir"
+openGauss-webclient --url opengauss://user:password@host:port/database?sslmode=[mode]
+openGauss-webclient --url "opengauss:///database?host=/absolute/path/to/unix/socket/dir"
 ```
 
 ### Multiple database sessions
