@@ -56,8 +56,8 @@ func initVars() {
 
 	serverHost = getVar("PGHOST", "localhost")
 	serverPort = getVar("PGPORT", "5432")
-	serverUser = getVar("PGUSER", "openGauss")
-	serverPassword = getVar("PGPASSWORD", "Gaussdb_123")
+	serverUser = getVar("PGUSER", "opengauss")
+	serverPassword = getVar("PGPASSWORD", "openGauss2022")
 	serverDatabase = getVar("PGDATABASE", "opengauss_test_booktown")
 }
 
@@ -115,7 +115,7 @@ func setup() {
 }
 
 func setupClient() {
-	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("opengauss://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	testClient, _ = NewFromUrl(url, nil)
 }
 
@@ -142,7 +142,7 @@ func teardown() {
 }
 
 func testNewClientFromUrl(t *testing.T) {
-	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("opengauss://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	client, err := NewFromUrl(url, nil)
 
 	if err != nil {
@@ -410,7 +410,7 @@ func testHistoryError(t *testing.T) {
 }
 
 func testHistoryUniqueness(t *testing.T) {
-	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("opengauss://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	client, _ := NewFromUrl(url, nil)
 
 	client.Query("SELECT * FROM books WHERE id = 1")
@@ -426,7 +426,7 @@ func testReadOnlyMode(t *testing.T) {
 		command.Opts.ReadOnly = false
 	}()
 
-	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
+	url := fmt.Sprintf("opengauss://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 	client, _ := NewFromUrl(url, nil)
 
 	err := client.SetReadOnlyMode()

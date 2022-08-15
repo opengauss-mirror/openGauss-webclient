@@ -24,12 +24,12 @@ func Test_Invalid_Url(t *testing.T) {
 
 		assert.Equal(t, "", str)
 		assert.Error(t, err)
-		assert.Equal(t, "Invalid URL. Valid format: postgres://user:password@host:port/db?sslmode=mode", err.Error())
+		assert.Equal(t, "Invalid URL. Valid format: opengauss://user:password@host:port/db?sslmode=mode", err.Error())
 	}
 }
 
 func Test_Valid_Url(t *testing.T) {
-	url := "postgres://myhost/database"
+	url := "opengauss://myhost/database"
 	str, err := BuildStringFromOptions(command.Options{URL: url})
 
 	assert.Equal(t, nil, err)
@@ -38,64 +38,64 @@ func Test_Valid_Url(t *testing.T) {
 
 func Test_Url_And_Ssl_Flag(t *testing.T) {
 	str, err := BuildStringFromOptions(command.Options{
-		URL: "postgres://myhost/database",
+		URL: "opengauss://myhost/database",
 		Ssl: "disable",
 	})
 
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://myhost/database?sslmode=disable", str)
+	assert.Equal(t, "opengauss://myhost/database?sslmode=disable", str)
 }
 
 func Test_Localhost_Url_And_No_Ssl_Flag(t *testing.T) {
 	str, err := BuildStringFromOptions(command.Options{
-		URL: "postgres://localhost/database",
+		URL: "opengauss://localhost/database",
 	})
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://localhost/database?sslmode=disable", str)
+	assert.Equal(t, "opengauss://localhost/database?sslmode=disable", str)
 
 	str, err = BuildStringFromOptions(command.Options{
-		URL: "postgres://127.0.0.1/database",
+		URL: "opengauss://127.0.0.1/database",
 	})
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://127.0.0.1/database?sslmode=disable", str)
+	assert.Equal(t, "opengauss://127.0.0.1/database?sslmode=disable", str)
 }
 
 func Test_Localhost_Url_And_Ssl_Flag(t *testing.T) {
 	str, err := BuildStringFromOptions(command.Options{
-		URL: "postgres://localhost/database",
+		URL: "opengauss://localhost/database",
 		Ssl: "require",
 	})
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://localhost/database?sslmode=require", str)
+	assert.Equal(t, "opengauss://localhost/database?sslmode=require", str)
 
 	str, err = BuildStringFromOptions(command.Options{
-		URL: "postgres://127.0.0.1/database",
+		URL: "opengauss://127.0.0.1/database",
 		Ssl: "require",
 	})
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://127.0.0.1/database?sslmode=require", str)
+	assert.Equal(t, "opengauss://127.0.0.1/database?sslmode=require", str)
 }
 
 func Test_Localhost_Url_And_Ssl_Arg(t *testing.T) {
 	str, err := BuildStringFromOptions(command.Options{
-		URL: "postgres://localhost/database?sslmode=require",
+		URL: "opengauss://localhost/database?sslmode=require",
 	})
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://localhost/database?sslmode=require", str)
+	assert.Equal(t, "opengauss://localhost/database?sslmode=require", str)
 
 	str, err = BuildStringFromOptions(command.Options{
-		URL: "postgres://127.0.0.1/database?sslmode=require",
+		URL: "opengauss://127.0.0.1/database?sslmode=require",
 	})
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://127.0.0.1/database?sslmode=require", str)
+	assert.Equal(t, "opengauss://127.0.0.1/database?sslmode=require", str)
 }
 
 func Test_ExtendedSSLFlags(t *testing.T) {
 	str, err := BuildStringFromOptions(command.Options{
-		URL: "postgres://localhost/database?sslmode=require&sslcert=cert&sslkey=key&sslrootcert=ca",
+		URL: "opengauss://localhost/database?sslmode=require&sslcert=cert&sslkey=key&sslrootcert=ca",
 	})
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://localhost/database?sslcert=cert&sslkey=key&sslmode=require&sslrootcert=ca", str)
+	assert.Equal(t, "opengauss://localhost/database?sslcert=cert&sslkey=key&sslmode=require&sslrootcert=ca", str)
 }
 
 func Test_Flag_Args(t *testing.T) {
@@ -108,7 +108,7 @@ func Test_Flag_Args(t *testing.T) {
 	})
 
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://user:password@host:5432/db", str)
+	assert.Equal(t, "opengauss://user:password@host:5432/db", str)
 }
 
 func Test_Localhost(t *testing.T) {
@@ -122,12 +122,12 @@ func Test_Localhost(t *testing.T) {
 
 	str, err := BuildStringFromOptions(opts)
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://user:password@localhost:5432/db?sslmode=disable", str)
+	assert.Equal(t, "opengauss://user:password@localhost:5432/db?sslmode=disable", str)
 
 	opts.Host = "127.0.0.1"
 	str, err = BuildStringFromOptions(opts)
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://user:password@127.0.0.1:5432/db?sslmode=disable", str)
+	assert.Equal(t, "opengauss://user:password@127.0.0.1:5432/db?sslmode=disable", str)
 }
 
 func Test_Localhost_And_Ssl(t *testing.T) {
@@ -145,7 +145,7 @@ func Test_Localhost_And_Ssl(t *testing.T) {
 
 	str, err := BuildStringFromOptions(opts)
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://user:password@localhost:5432/db?sslcert=certPath&sslkey=keyPath&sslmode=require&sslrootcert=caPath", str)
+	assert.Equal(t, "opengauss://user:password@localhost:5432/db?sslcert=certPath&sslkey=keyPath&sslmode=require&sslrootcert=caPath", str)
 }
 
 func Test_No_User(t *testing.T) {
@@ -155,7 +155,7 @@ func Test_No_User(t *testing.T) {
 	userAndPass := url.UserPassword(u.Username, "").String()
 
 	assert.Equal(t, nil, err)
-	assert.Equal(t, fmt.Sprintf("postgres://%s@host:5432/db", userAndPass), str)
+	assert.Equal(t, fmt.Sprintf("opengauss://%s@host:5432/db", userAndPass), str)
 }
 
 func Test_Port(t *testing.T) {
@@ -163,7 +163,7 @@ func Test_Port(t *testing.T) {
 	str, err := BuildStringFromOptions(opts)
 
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "postgres://user:@host:5000/db", str)
+	assert.Equal(t, "opengauss://user:@host:5000/db", str)
 }
 
 func Test_Blank(t *testing.T) {
