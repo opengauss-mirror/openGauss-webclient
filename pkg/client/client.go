@@ -98,7 +98,6 @@ func NewFromUrl(url string, sshInfo *shared.SSHInfo) (*Client, error) {
 
 		tunnel, err := NewTunnel(sshInfo, url)
 		if err != nil {
-			tunnel.Close()
 			return nil, err
 		}
 
