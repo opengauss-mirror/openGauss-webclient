@@ -34,7 +34,12 @@ func DB(c *gin.Context) *client.Client {
 	if command.Opts.Sessions {
 		return DbSessions[getSessionId(c.Request)]
 	}
-	DbClient.SetApplicationName()
+	if DbClient != nil {
+		_, err := DbClient.SetApplicationName()
+		if err != nil {
+			return nil
+		}
+	}
 	return DbClient
 }
 
