@@ -12,7 +12,10 @@ func testDumpExport(t *testing.T) {
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", serverUser, serverPassword, serverHost, serverPort, serverDatabase)
 
 	savePath := "/tmp/dump.sql.gz"
-	os.Remove(savePath)
+	
+	if err := os.Remove(savePath); err != nil {
+		panic(err)
+	}
 
 	saveFile, err := os.Create(savePath)
 	if err != nil {
@@ -20,8 +23,13 @@ func testDumpExport(t *testing.T) {
 	}
 
 	defer func() {
-		saveFile.Close()
-		os.Remove(savePath)
+
+		if err := saveFile.Close(); err != nil {
+			panic(err)
+		}
+		if err := os.Remove(savePath); err != nil {
+			panic(err)
+    }
 	}()
 
 	dump := Dump{}
