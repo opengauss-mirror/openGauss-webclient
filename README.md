@@ -1,118 +1,110 @@
 # openGauss-webclient
 
-Web-based openGauss database browser written in Go.
+一个基于 Go 语言编写的 Web 版 openGauss 数据库浏览器。
 
-*Note: This project is a fork and modified version of [pgweb](https://github.com/sosedoff/pgweb)*
+注意：该项目是一个对 pgweb 项目的分支和修改版本。
 
-## Overview
+## 概述
 
-openGauss-webclient is a web-based database browser for openGauss, written in Go and works
-on OSX, Linux and Windows machines. Main idea behind using Go for backend development
-is to utilize ability of the compiler to produce zero-dependency binaries for 
-multiple platforms. openGauss-webclient was created as an attempt to build very simple and portable
-application to work with local or remote openGauss databases.
+openGauss-webclient 是一个基于 Go 语言的 Web 版 openGauss 数据库浏览器，可在 MacOS,Linux 和 Windows 等平台上运行。使用 Go 语言进行后端开发的主要目的是利用编译器在多平台生成零依赖二进制文件的能力。openGauss-webclient 的创建旨在构建一个非常简单和可移植的应用，用于与本地或远程 openGauss 数据库进行交互。
 
+## 功能
 
-## Features
++ 支持跨平台运行，支持 MacOS/Linux/Windows 32/64位系统。
++ 简单安装，(以单个二进制文件的形式分发)。
++ 零依赖项。
++ SSH 连接。
++ 多个数据库会话。
++ 简单的数据库浏览器。
++ 执行和分析自定义 SQL 查询。
++ 将表和查询数据导出为CSV/JSON/XML格式。
++ 查询历史记录。
++ 服务器书签。
 
-- Cross-platform support OSX/Linux/Windows 32/64-bit
-- Simple installation (distributed as a single binary)
-- Zero dependencies
-- SSH Connections
-- Multiple database sessions
-- Simple database browser
-- Execute and analyze custom SQL queries
-- Table and query data export to CSV/JSON/XML
-- Query history
-- Server bookmarks
+## 使用方法
 
-## Usage
-
-Start server:
+要开始服务器，请运行以下命令:
 
 ```
 openGauss-webclient
 ```
 
-You can also provide connection flags:
+您还可以提供连接标志:
 
 ```
 openGauss-webclient --host localhost --user myuser --db mydb
 ```
 
-Connection URL scheme is also supported:
+支持连接 URL 方案:
 
 ```
 openGauss-webclient --url opengauss://user:password@host:port/database?sslmode=[mode]
 openGauss-webclient --url "opengauss:///database?host=/absolute/path/to/unix/socket/dir"
 ```
 
-### Multiple database sessions
+### 多个数据库会话
 
-To enable multiple database sessions in pgweb, start the server with:
+要启用 pgweb 中的多个数据库会话，请启动服务器并使用以下命令:
 
 ```
 openGauss-webclient --sessions
 ```
 
-Or set environment variable:
+或者设置环境变量:
 
 ```
 SESSIONS=1 openGauss-webclient
 ```
 
+## 从源代码构建
 
-## Build from source
-
-Go 1.7 is required. You can install Go with `DNF`:
+Go 1.7 是必要的。您可以使用 DNF 安装 Go:
 
 ```
 dnf install -y golang
 ```
 
-To compile source code run the following command:
+要编译源代码，请运行以下命令:
+
 ```
 make setup
 make dev
 ```
 
-This will produce openGauss-webclient binary in the current directory.
+这将在当前目录下生成 openGauss-webclient 二进制文件。
 
-There's also a task to compile banaries for other operating system:
+此外，还有一项任务要编译其他操作系统的二进制文件:
+
 ```
 make release
 ```
 
-Compiled binaries will be stored into ./bin directory.
+编译后的二进制文件将存储在 ./bin 目录中。
 
+## 测试
 
-## Testing
+在运行测试之前，请确保您在 localhost:5432 接口上运行了 openGauss 服务器。此外，您必须具有 openGauss 用户，该用户密码为 Gaussdb_123，可以在您的本地环境中创建新数据库。同时，openGauss-webclient 服务器不应该同时运行。
 
-Before running tests, make sure you have openGauss server running on `localhost:5432`
-interface. Also, you must have `openGauss` user with password `Gaussdb_123` that could create new databases
-in your local environment. openGauss-webclient server should not be running at the same time.
-
-Execute test suite:
+执行测试套件:
 
 ```
 make test
 ```
 
-If you're using Docker locally, you might also run pgweb test suite against
-all supported openGauss version with a single command:
+如果您在本地使用 Docker，可以使用以下命令将所有支持的 openGauss 版本与 pgweb 测试套件一起运行:
 
 ```
 make test-all
 ```
 
-## Contribute
+## 贡献
 
-- Fork this repository
-- Create a new feature branch for a new functionality or bugfix
-- Commit your changes
-- Execute test suite
-- Push your code and open a new pull request
++ 克隆此仓库
++ 创建一个新的功能分支，用于添加新功能或修复错误
+  提交更改
++ 执行测试套件
++ 提交代码并打开新的合并请求
 
-## License
+## 许可证
 
-The MIT License (MIT). See [LICENSE](LICENSE) file for more details.
+MIT 许可证 (MIT)。请查看 LICENSE 文件以获取更多详细信息。
